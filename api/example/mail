@@ -1,0 +1,10 @@
+EHLO localhost
+MAIL FROM:<david@dollar.io>
+RCPT TO:<david@stash.dollar.io>
+DATA
+Delivered-To: david@stash.dollar.io
+Subject: Hello on %%DATE%%
+
+Hello, World!
+.
+QUIT

@@ -1,0 +1,1 @@
+-s -r '\.(go|graphql)$' -R '^vendor/' -- sh -c "make -B dist/api && exec dist/api"

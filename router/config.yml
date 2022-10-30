@@ -1,0 +1,12 @@
+tls:
+  options:
+    default:
+      clientAuth:
+        caFiles:
+          - /db/certs/public/ca.pem
+        clientAuthType: RequireAndVerifyClientCert
+    register:
+      clientAuth:
+        caFiles:
+          - /db/certs/public/ca.pem
+        clientAuthType: VerifyClientCertIfGiven

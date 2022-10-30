@@ -1,0 +1,30 @@
+services:
+  router:
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./router:/etc/traefik/dynamic
+  api:
+    build:
+      target: development
+    environment:
+      - MODE=development
+    volumes:
+      - ./api:/src
+      - ./db:/src/db
+  messages:
+    build:
+      target: development
+    volumes:
+      - ./apps/messages:/src
+  register:
+    build:
+      target: development
+    volumes:
+      - ./apps/register:/src
+  smtpd:
+    build:
+      target: development
+    volumes:
+      - ./apps/smtpd:/src
+      - ./db:/src/db

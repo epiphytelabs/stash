@@ -1,0 +1,10 @@
+distinguished_name = ca_dn
+
+[ca_dn]
+commonName = "ca.stash"
+
+[v3_ca]
+basicConstraints = critical, CA:TRUE
+keyUsage = critical, keyCertSign, cRLSign
+subjectKeyIdentifier = hash
+nameConstraints = critical, permitted;DNS:.%%DOMAIN%%

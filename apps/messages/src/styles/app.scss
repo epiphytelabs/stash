@@ -1,0 +1,148 @@
+@import "bootstrap";
+
+$credit: #136e13;
+$debit: #c32939;
+
+body {
+	background: #f0f0f0;
+}
+
+.card {
+	.card-header {
+		color: $gray-600;
+		font-size: 0.9em;
+		font-weight: bold;
+	}
+}
+
+table.table {
+	margin-bottom: 0;
+
+	thead {
+		background: #ddd;
+	}
+
+	tbody {
+		background-color: #fff;
+	}
+
+	> :not(:first-child) {
+		border-top: 2px #ddd solid;
+	}
+
+	th,
+	td {
+		white-space: nowrap;
+	}
+
+	th.expand,
+	td.expand {
+		width: 100%;
+	}
+}
+
+.v-select {
+	background-color: white;
+}
+
+.modal {
+	filter: drop-shadow(8px 8px 12px $gray-600);
+
+	.modal-header,
+	.modal-footer {
+		background-color: $gray-300;
+	}
+}
+
+#threads {
+	height: calc(100vh - 56px);
+	overflow-y: scroll;
+
+	.thread {
+		cursor: pointer;
+
+		// &.active {
+		// 	background-color: #e6f7ff;
+		// }
+
+		.participants {
+			font-size: 0.8em;
+			opacity: 80%;
+		}
+
+		.subject {
+			font-size: 0.9em;
+		}
+
+		.updated {
+			font-size: 0.8em;
+			opacity: 50%;
+		}
+	}
+}
+
+.messages {
+	height: calc(100vh - 56px);
+	overflow-y: scroll;
+
+	&.hidden {
+		display: none;
+	}
+
+	.subject {
+		font-weight: bold;
+		margin-bottom: 0.8em;
+	}
+}
+
+.message {
+	.body {
+		padding-left: 16px;
+		padding-right: 16px;
+
+		h1,
+		h2,
+		h3,
+		h4,
+		h5,
+		h6 {
+			font-size: 1em;
+		}
+
+		> table[width="100%"] {
+			margin-left: -16px;
+			width: calc(100% + 32px);
+		}
+
+		> hr:first-child {
+			display: none;
+		}
+
+		> div[dir="ltr"],
+		p,
+		h1,
+		h2,
+		h3,
+		h4,
+		h5,
+		h6 {
+			display: block;
+			margin-block-start: 1em;
+			margin-block-end: 1em;
+			margin-inline-start: 0px;
+			margin-inline-end: 0px;
+		}
+
+		pre {
+			background-color: #f0f0f0;
+			border: 1px #ccc solid;
+			border-radius: 4px;
+			font-family: monospace;
+			padding: 8px;
+		}
+
+		code {
+			color: #666;
+		}
+	}
+}

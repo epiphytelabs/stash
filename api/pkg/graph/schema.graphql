@@ -1,0 +1,59 @@
+schema {
+	mutation: Mutation
+	query: Query
+	subscription: Subscription
+}
+
+scalar Date
+scalar DateTime
+
+type Mutation {
+	register(id: String!, password: String!): String!
+}
+
+type Query {
+	blobs: [Blob!]!
+	# messages: [Message!]!
+	# message(hash: ID!): Message!
+	threads: [Thread!]!
+	user: User
+}
+
+type Subscription {
+	type_changed(name: String!): ID!
+}
+
+type Blob {
+	hash: ID!
+	created: DateTime!
+}
+
+type Message {
+	body: MessageBody!
+	from: MessageAddress!
+	received: DateTime!
+	subject: String!
+}
+
+type MessageAddress {
+	address: String!
+	display: String!
+	name: String!
+}
+
+type MessageBody {
+	html: String!
+	text: String!
+}
+
+type Thread {
+	id: ID!
+	messages: [Message!]!
+	participants: [MessageAddress!]!
+	subject: String!
+	updated: DateTime!
+}
+
+type User {
+	id: ID!
+}

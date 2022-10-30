@@ -1,0 +1,82 @@
+version: "3.9"
+services:
+  router:
+    build:
+      context: router
+    environment:
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_HOSTED_ZONE_ID
+    command:
+      # - "--accesslog"
+      - "--api.insecure"
+      - "--certificatesresolvers.letsencrypt.acme.email=root@epiphyte.xyz"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/db/acme/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=route53"
+      - "--entrypoints.smtp.address=:25"
+      - "--entrypoints.http.address=:80"
+      - "--entrypoints.http.http.redirections.entrypoint.to=https"
+      - "--entrypoints.http.http.redirections.entrypoint.scheme=https"
+      - "--entrypoints.https.address=:443"
+      - "--entrypoints.https.http.tls=true"
+      - "--entrypoints.https.http.tls.certresolver=${CERT_RESOLVER:-}"
+      - "--entrypoints.https.http.tls.domains[0].main=${DOMAIN:-stash.localhost}"
+      - "--entrypoints.https.http.tls.domains[0].sans=*.${DOMAIN:-stash.localhost}"
+      - "--log.level=${LOG_LEVEL:-INFO}"
+      - "--providers.docker"
+      - "--providers.file.filename=/etc/traefik/dynamic/config.yml"
+      - "--providers.file.watch=true"
+      - "--serverstransport.insecureskipverify=true"
+    labels:
+      - "traefik.http.routers.router.entrypoints=https"
+    ports:
+      - "25:25"
+      - "80:80"
+      - "443:443"
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./db/acme:/db/acme
+      - ./db/certs/public:/db/certs/public
+  api:
+    build:
+      context: api
+    labels:
+      - "traefik.http.middlewares.pass-client-cert.passtlsclientcert.pem=false"
+      - "traefik.http.middlewares.pass-client-cert.passtlsclientcert.info.subject.commonname=true"
+      - "traefik.http.routers.api.entrypoints=https"
+      - "traefik.http.routers.api.middlewares=pass-client-cert"
+      - "traefik.http.routers.api.rule=Host(`${DOMAIN:-stash.localhost}`) && (PathPrefix(`/api`) || PathPrefix(`/graph`))"
+      - "traefik.http.routers.api.tls=true"
+      - "traefik.http.services.api.loadbalancer.server.scheme=https"
+    restart: unless-stopped
+    volumes:
+      - ./db:/db
+  messages:
+    build:
+      args:
+        DOMAIN: ${DOMAIN:-stash.localhost}
+      context: apps/messages
+    labels:
+      - "traefik.http.routers.messages.entrypoints=https"
+      - "traefik.http.routers.messages.rule=Host(`${DOMAIN:-stash.localhost}`) && PathPrefix(`/apps/messages/`)"
+      - "traefik.http.routers.messages.tls=true"
+  register:
+    build:
+      args:
+        DOMAIN: ${DOMAIN:-stash.localhost}
+      context: apps/register
+    labels:
+      - "traefik.http.routers.register.entrypoints=https"
+      - "traefik.http.routers.register.rule=Host(`register.${DOMAIN:-stash.localhost}`)"
+      - "traefik.http.routers.register.tls=true"
+      - "traefik.http.routers.register.tls.options=register@file"
+  smtpd:
+    build:
+      context: apps/smtpd
+    labels:
+      - "traefik.tcp.routers.smtpd.entrypoints=smtp"
+      - "traefik.tcp.routers.smtpd.rule=HostSNI(`*`)"
+    restart: unless-stopped
+    volumes:
+      - ./db:/db

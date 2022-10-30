@@ -1,0 +1,55 @@
+@import "bootstrap";
+
+$credit: #136e13;
+$debit: #c32939;
+
+body {
+	background: #f0f0f0;
+}
+
+.card {
+	.card-header {
+		color: $gray-600;
+		font-size: 0.9em;
+		font-weight: bold;
+	}
+}
+
+table.table {
+	margin-bottom: 0;
+
+	thead {
+		background: #ddd;
+	}
+
+	tbody {
+		background-color: #fff;
+	}
+
+	> :not(:first-child) {
+		border-top: 2px #ddd solid;
+	}
+
+	th,
+	td {
+		white-space: nowrap;
+	}
+
+	th.expand,
+	td.expand {
+		width: 100%;
+	}
+}
+
+.v-select {
+	background-color: white;
+}
+
+.modal {
+	filter: drop-shadow(8px 8px 12px $gray-600);
+
+	.modal-header,
+	.modal-footer {
+		background-color: $gray-300;
+	}
+}
