@@ -81,15 +81,6 @@ func initializeDatabase(base string) (*sql.DB, error) {
 		CREATE INDEX IF NOT EXISTS labels_hash ON labels (hash);
 		CREATE INDEX IF NOT EXISTS labels_hash_key ON labels (hash, key);
 		CREATE INDEX IF NOT EXISTS labels_hash_key_value ON labels (hash, key, value);
-
-		CREATE TABLE IF NOT EXISTS tokens (
-			hash VARCHAR(64) NOT NULL,
-			token VARCHAR NOT NULL,
-			count INTEGER NOT NULL
-		);
-
-		CREATE INDEX IF NOT EXISTS tokens_hash ON tokens (hash);
-		CREATE INDEX IF NOT EXISTS tokens_hash_token ON tokens (hash, token);
 	`)
 	if err != nil {
 		return nil, errors.WithStack(err)

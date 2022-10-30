@@ -31,12 +31,10 @@ func (s *Store) BlobCreate(r io.Reader) (*Blob, error) {
 	file := hashFile(hash)
 
 	if err := s.BlobExists(hash); err == nil {
-		fmt.Printf("err: %+v\n", err)
 		return nil, errors.Errorf("hash exists: %s", hash)
 	}
 
 	if _, err := s.fs.Stat(file); !os.IsNotExist(err) {
-		fmt.Printf("err: %+v\n", err)
 		return nil, errors.Errorf("hash exists: %s", hash)
 	}
 
@@ -52,12 +50,6 @@ func (s *Store) BlobCreate(r io.Reader) (*Blob, error) {
 
 	if _, err := f.Write(data); err != nil {
 		return nil, errors.WithStack(err)
-	}
-
-	for token, count := range tokenize(string(data)) {
-		if _, err := s.db.Exec("INSERT INTO tokens (hash, token, count) VALUES (?, ?, ?)", hash, token, count); err != nil {
-			return nil, errors.WithStack(err)
-		}
 	}
 
 	return s.BlobMetadata(hash)
