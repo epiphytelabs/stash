@@ -261,9 +261,8 @@ func strInNegatableGlobList(str string, negatableGlobList []negatableGlob) bool 
 }
 
 // InList | WhiteList | BlackList
-//
-//	y   |           |     x
-//	n   |     x     |
+//   y   |           |     x
+//   n   |     x     |
 func (dg *Depguard) flagIt(pkg string, prefixList []string, globList []glob.Glob) bool {
 	return pkgInList(pkg, prefixList, globList) == (dg.ListType == LTBlacklist)
 }

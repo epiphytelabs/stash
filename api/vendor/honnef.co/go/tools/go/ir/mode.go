@@ -15,8 +15,9 @@ import (
 //
 // *BuilderMode satisfies the flag.Value interface.  Example:
 //
-//	var mode = ir.BuilderMode(0)
-//	func init() { flag.Var(&mode, "build", ir.BuilderModeDoc) }
+// 	var mode = ir.BuilderMode(0)
+// 	func init() { flag.Var(&mode, "build", ir.BuilderModeDoc) }
+//
 type BuilderMode uint
 
 const (

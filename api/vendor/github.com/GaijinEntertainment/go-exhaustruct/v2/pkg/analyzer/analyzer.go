@@ -29,9 +29,8 @@ type analyzer struct {
 }
 
 // NewAnalyzer returns a go/analysis-compatible analyzer.
-//
-//	-i arguments adds include patterns
-//	-e arguments adds exclude patterns
+//   -i arguments adds include patterns
+//   -e arguments adds exclude patterns
 func NewAnalyzer(include []string, exclude []string) (*analysis.Analyzer, error) {
 	a := analyzer{ //nolint:exhaustruct
 		typesProcessCache: map[types.Type]bool{},

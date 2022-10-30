@@ -134,7 +134,7 @@ func RepeatEntropy(match match.Match) float64 {
 }
 
 // CalcBruteForceCardinality calculates the brute force cardinality
-// TODO: Validate against python
+//TODO: Validate against python
 func CalcBruteForceCardinality(password string) float64 {
 	lower, upper, digits, symbols := float64(0), float64(0), float64(0), float64(0)
 

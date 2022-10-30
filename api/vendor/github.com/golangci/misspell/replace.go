@@ -92,16 +92,11 @@ extract words from each line1
 
 replace word -> newword
 if word == new-word
-
-	continue
-
+  continue
 if new-word in list of replacements
-
-	continue
-
+  continue
 new word not original, and not in list of replacements
-
-	some substring got mixed up.  UNdo
+  some substring got mixed up.  UNdo
 */
 func (r *Replacer) recheckLine(s string, lineNum int, buf io.Writer, next func(Diff)) {
 	first := 0
@@ -196,8 +191,7 @@ Loop:
 }
 
 // Replace is corrects misspellings in input, returning corrected version
-//
-//	along with a list of diffs.
+//  along with a list of diffs.
 func (r *Replacer) Replace(input string) (string, []Diff) {
 	output := r.engine.Replace(input)
 	if input == output {

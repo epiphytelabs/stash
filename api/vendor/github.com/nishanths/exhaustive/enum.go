@@ -157,8 +157,7 @@ func validBasic(basic *types.Basic) bool {
 // type is a valid basic type to form an enum.
 // A type that passes this check meets the definition of an enum type.
 // Note that
-//
-//	validNamedBasic(t) == true => t.(*types.Named)
+//   validNamedBasic(t) == true => t.(*types.Named)
 func validNamedBasic(t types.Type) bool {
 	named, ok := t.(*types.Named)
 	if !ok {

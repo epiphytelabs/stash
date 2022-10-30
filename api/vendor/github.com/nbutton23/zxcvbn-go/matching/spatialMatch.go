@@ -10,7 +10,7 @@ import (
 
 const spatialMatcherName = "SPATIAL"
 
-// FilterSpatialMatcher can be pass to zxcvbn-go.PasswordStrength to skip that matcher
+//FilterSpatialMatcher can be pass to zxcvbn-go.PasswordStrength to skip that matcher
 func FilterSpatialMatcher(m match.Matcher) bool {
 	return m.ID == spatialMatcherName
 }

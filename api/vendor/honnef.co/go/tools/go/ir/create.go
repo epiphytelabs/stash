@@ -27,6 +27,7 @@ const avgInstructionsPerBlock = 16
 // NewProgram returns a new IR Program.
 //
 // mode controls diagnostics and checking during IR construction.
+//
 func NewProgram(fset *token.FileSet, mode BuilderMode) *Program {
 	prog := &Program{
 		Fset:     fset,
@@ -50,6 +51,7 @@ func NewProgram(fset *token.FileSet, mode BuilderMode) *Program {
 // For objects from Go source code, syntax is the associated syntax
 // tree (for funcs and vars only); it will be used during the build
 // phase.
+//
 func memberFromObject(pkg *Package, obj types.Object, syntax ast.Node) {
 	name := obj.Name()
 	switch obj := obj.(type) {
@@ -126,6 +128,7 @@ func memberFromObject(pkg *Package, obj types.Object, syntax ast.Node) {
 // membersFromDecl populates package pkg with members for each
 // typechecker object (var, func, const or type) associated with the
 // specified decl.
+//
 func membersFromDecl(pkg *Package, decl ast.Decl) {
 	switch decl := decl.(type) {
 	case *ast.GenDecl: // import, const, type or var
@@ -174,6 +177,7 @@ func membersFromDecl(pkg *Package, decl ast.Decl) {
 //
 // The real work of building IR form for each function is not done
 // until a subsequent call to Package.Build().
+//
 func (prog *Program) CreatePackage(pkg *types.Package, files []*ast.File, info *types.Info, importable bool) *Package {
 	p := &Package{
 		Prog:      prog,
@@ -256,6 +260,7 @@ var printMu sync.Mutex
 
 // AllPackages returns a new slice containing all packages in the
 // program prog in unspecified order.
+//
 func (prog *Program) AllPackages() []*Package {
 	pkgs := make([]*Package, 0, len(prog.packages))
 	for _, pkg := range prog.packages {
@@ -277,6 +282,7 @@ func (prog *Program) AllPackages() []*Package {
 // false---yet this function remains very convenient.
 // Clients should use (*Program).Package instead where possible.
 // IR doesn't really need a string-keyed map of packages.
+//
 func (prog *Program) ImportedPackage(path string) *Package {
 	return prog.imported[path]
 }

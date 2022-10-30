@@ -28,7 +28,6 @@ var (
 )
 
 // Run the gomodguard linter. Returns the exit code to use.
-//
 //nolint:funlen
 func Run() int {
 	var (

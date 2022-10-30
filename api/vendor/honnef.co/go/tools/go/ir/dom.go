@@ -29,10 +29,12 @@ import (
 // Idom returns the block that immediately dominates b:
 // its parent in the dominator tree, if any.
 // The entry node (b.Index==0) does not have a parent.
+//
 func (b *BasicBlock) Idom() *BasicBlock { return b.dom.idom }
 
 // Dominees returns the list of blocks that b immediately dominates:
 // its children in the dominator tree.
+//
 func (b *BasicBlock) Dominees() []*BasicBlock { return b.dom.children }
 
 // Dominates reports whether b dominates c.
@@ -48,6 +50,7 @@ func (a byDomPreorder) Less(i, j int) bool { return a[i].dom.pre < a[j].dom.pre 
 
 // DomPreorder returns a new slice containing the blocks of f in
 // dominator tree preorder.
+//
 func (f *Function) DomPreorder() []*BasicBlock {
 	n := len(f.Blocks)
 	order := make(byDomPreorder, n)
@@ -65,6 +68,7 @@ type domInfo struct {
 
 // buildDomTree computes the dominator tree of f using the LT algorithm.
 // Precondition: all blocks are reachable (e.g. optimizeBlocks has been run).
+//
 func buildDomTree(fn *Function) {
 	// The step numbers refer to the original LT paper; the
 	// reordering is due to Georgiadis.
@@ -273,6 +277,7 @@ func buildPostDomTree(fn *Function) {
 // numberDomTree sets the pre- and post-order numbers of a depth-first
 // traversal of the dominator tree rooted at v.  These are used to
 // answer dominance queries in constant time.
+//
 func numberDomTree(v *BasicBlock, pre, post int32) (int32, int32) {
 	v.dom.pre = pre
 	pre++
@@ -287,6 +292,7 @@ func numberDomTree(v *BasicBlock, pre, post int32) (int32, int32) {
 // numberPostDomTree sets the pre- and post-order numbers of a depth-first
 // traversal of the post-dominator tree rooted at v.  These are used to
 // answer post-dominance queries in constant time.
+//
 func numberPostDomTree(v *BasicBlock, pre, post int32) (int32, int32) {
 	v.pdom.pre = pre
 	pre++
@@ -304,6 +310,7 @@ func numberPostDomTree(v *BasicBlock, pre, post int32) (int32, int32) {
 // computed by the LT algorithm by comparing against the dominance
 // relation computed by a naive Kildall-style forward dataflow
 // analysis (Algorithm 10.16 from the "Dragon" book).
+//
 func sanityCheckDomTree(f *Function) {
 	n := len(f.Blocks)
 
@@ -388,7 +395,6 @@ func sanityCheckDomTree(f *Function) {
 // Printing functions ----------------------------------------
 
 // printDomTree prints the dominator tree as text, using indentation.
-//
 //lint:ignore U1000 used during debugging
 func printDomTreeText(buf *bytes.Buffer, v *BasicBlock, indent int) {
 	fmt.Fprintf(buf, "%*s%s\n", 4*indent, "", v)
@@ -399,7 +405,6 @@ func printDomTreeText(buf *bytes.Buffer, v *BasicBlock, indent int) {
 
 // printDomTreeDot prints the dominator tree of f in AT&T GraphViz
 // (.dot) format.
-//
 //lint:ignore U1000 used during debugging
 func printDomTreeDot(buf io.Writer, f *Function) {
 	fmt.Fprintln(buf, "//", f)
@@ -427,7 +432,6 @@ func printDomTreeDot(buf io.Writer, f *Function) {
 }
 
 // printDomTree prints the dominator tree as text, using indentation.
-//
 //lint:ignore U1000 used during debugging
 func printPostDomTreeText(buf io.Writer, v *BasicBlock, indent int) {
 	fmt.Fprintf(buf, "%*s%s\n", 4*indent, "", v)
@@ -438,7 +442,6 @@ func printPostDomTreeText(buf io.Writer, v *BasicBlock, indent int) {
 
 // printDomTreeDot prints the dominator tree of f in AT&T GraphViz
 // (.dot) format.
-//
 //lint:ignore U1000 used during debugging
 func printPostDomTreeDot(buf io.Writer, f *Function) {
 	fmt.Fprintln(buf, "//", f)

@@ -63,6 +63,7 @@ const debugLifting = false
 //
 // domFrontier's methods mutate the slice's elements but not its
 // length, so their receivers needn't be pointers.
+//
 type domFrontier [][]*BasicBlock
 
 func (df domFrontier) add(u, v *BasicBlock) {
@@ -163,6 +164,7 @@ func clearInstrs(instrs []Instruction) {
 // - fn has no dead blocks (blockopt has run).
 // - Def/use info (Operands and Referrers) is up-to-date.
 // - The dominator tree is up-to-date.
+//
 func lift(fn *Function) {
 	// TODO(adonovan): opt: lots of little optimizations may be
 	// worthwhile here, especially if they cause us to avoid
@@ -948,6 +950,7 @@ func liftAlloc(closure *closure, df domFrontier, rdf postDomFrontier, alloc *All
 // replaceAll replaces all intraprocedural uses of x with y,
 // updating x.Referrers and y.Referrers.
 // Precondition: x.Referrers() != nil, i.e. x must be local to some function.
+//
 func replaceAll(x, y Value) {
 	var rands []*Value
 	pxrefs := x.Referrers()
@@ -992,6 +995,7 @@ func replace(instr Instruction, x, y Value) {
 
 // renamed returns the value to which alloc is being renamed,
 // constructing it lazily if it's the implicit zero initialization.
+//
 func renamed(fn *Function, renaming []Value, alloc *Alloc) Value {
 	v := renaming[alloc.index]
 	if v == nil {
@@ -1199,6 +1203,7 @@ func splitOnNewInformation(u *BasicBlock, renaming *StackMap) {
 // renaming is a map from *Alloc (keyed by index number) to its
 // dominating stored value; newPhis[x] is the set of new φ-nodes to be
 // prepended to block x.
+//
 func rename(u *BasicBlock, renaming []Value, newPhis newPhiMap, newSigmas newSigmaMap) {
 	// Each φ-node becomes the new name for its associated Alloc.
 	for _, np := range newPhis[u.Index] {

@@ -16,7 +16,6 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.0
 	github.com/vektra/mockery/v2 v2.14.0
-	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2
 	software.sslmate.com/src/go-pkcs12 v0.2.0
 )
 
@@ -204,4 +203,4 @@ require (
 	mvdan.cc/unparam v0.0.0-20220706161116-678bad134442 // indirect
 )
 
-replace github.com/graph-gophers/graphql-go => ../../graphql-go
+replace github.com/graph-gophers/graphql-go => github.com/ddollar/graphql-go v1.4.0-ddollar

@@ -287,7 +287,7 @@ github.com/gostaticanalysis/nilerr
 # github.com/goware/modvendor v0.5.0
 ## explicit; go 1.14
 github.com/goware/modvendor
-# github.com/graph-gophers/graphql-go v1.4.0 => ../../graphql-go
+# github.com/graph-gophers/graphql-go v1.4.0 => github.com/ddollar/graphql-go v1.4.0-ddollar
 ## explicit; go 1.13
 github.com/graph-gophers/graphql-go
 github.com/graph-gophers/graphql-go/decode
@@ -814,10 +814,6 @@ golang.org/x/tools/internal/imports
 golang.org/x/tools/internal/packagesinternal
 golang.org/x/tools/internal/typeparams
 golang.org/x/tools/internal/typesinternal
-# golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2
-## explicit; go 1.17
-golang.org/x/xerrors
-golang.org/x/xerrors/internal
 # google.golang.org/protobuf v1.28.0
 ## explicit; go 1.11
 google.golang.org/protobuf/encoding/prototext
@@ -906,4 +902,4 @@ mvdan.cc/unparam/check
 ## explicit; go 1.15
 software.sslmate.com/src/go-pkcs12
 software.sslmate.com/src/go-pkcs12/internal/rc2
-# github.com/graph-gophers/graphql-go => ../../graphql-go
+# github.com/graph-gophers/graphql-go => github.com/ddollar/graphql-go v1.4.0-ddollar

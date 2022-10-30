@@ -8,6 +8,10 @@
 			"path": "api"
 		},
 		{
+			"name": "apps/messages",
+			"path": "apps/messages"
+		},
+		{
 			"name": "apps/smtpd",
 			"path": "apps/smtpd"
 		}

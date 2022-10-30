@@ -10,9 +10,7 @@ import (
 
 // ReportWithoutIgnore returns a report function which can set to (analysis.Pass).Report.
 // The report function ignores a diagnostic which annotated by ignore comment as the below.
-//
-//	//lint:ignore Check1[,Check2,...,CheckN] reason
-//
+//   //lint:ignore Check1[,Check2,...,CheckN] reason
 // names is a list of checker names.
 // If names was omitted, the report function ignores by pass.Analyzer.Name.
 func ReportWithoutIgnore(pass *analysis.Pass, names ...string) func(analysis.Diagnostic) {

@@ -118,9 +118,9 @@ func newRegexMatcher(regex *regexp.Regexp, inverse bool) *regexMatcher {
 // the only zero-width lookahead is provided by $, \z, and \b. For instance, the
 // following regular expressions match the "foo", but not "foobar":
 //
-//	foo$
-//	foo\b
-//	(foo$)|(baz$)
+//   foo$
+//   foo\b
+//   (foo$)|(baz$)
 //
 // Thus, to choose whether we can exclude this prefix, m must be an inverse
 // matcher that does not contain the zero-width ops $, \z, and \b.

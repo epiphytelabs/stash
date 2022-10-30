@@ -269,7 +269,6 @@ func (s *Schema) exec(ctx context.Context, queryString string, operationName str
 		PanicHandler:     s.panicHandler,
 		ErrorExtensioner: s.errorExtensioner,
 	}
-	fmt.Printf("r.ErrorExtensioner: %+v\n", r.ErrorExtensioner)
 	varTypes := make(map[string]*introspection.Type)
 	for _, v := range op.Vars {
 		t, err := common.ResolveType(v.Type, s.schema.Resolve)

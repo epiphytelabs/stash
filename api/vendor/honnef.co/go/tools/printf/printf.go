@@ -2,26 +2,25 @@
 // strings.
 //
 // It parses verbs according to the following syntax:
+//     Numeric -> '0'-'9'
+//     Letter -> 'a'-'z' | 'A'-'Z'
+//     Index -> '[' Numeric+ ']'
+//     Star -> '*'
+//     Star -> Index '*'
 //
-//	Numeric -> '0'-'9'
-//	Letter -> 'a'-'z' | 'A'-'Z'
-//	Index -> '[' Numeric+ ']'
-//	Star -> '*'
-//	Star -> Index '*'
+//     Precision -> Numeric+ | Star
+//     Width -> Numeric+ | Star
 //
-//	Precision -> Numeric+ | Star
-//	Width -> Numeric+ | Star
+//     WidthAndPrecision -> Width '.' Precision
+//     WidthAndPrecision -> Width '.'
+//     WidthAndPrecision -> Width
+//     WidthAndPrecision -> '.' Precision
+//     WidthAndPrecision -> '.'
 //
-//	WidthAndPrecision -> Width '.' Precision
-//	WidthAndPrecision -> Width '.'
-//	WidthAndPrecision -> Width
-//	WidthAndPrecision -> '.' Precision
-//	WidthAndPrecision -> '.'
+//     Flag -> '+' | '-' | '#' | ' ' | '0'
+//     Verb -> Letter | '%'
 //
-//	Flag -> '+' | '-' | '#' | ' ' | '0'
-//	Verb -> Letter | '%'
-//
-//	Input -> '%' [ Flag+ ] [ WidthAndPrecision ] [ Index ] Verb
+//     Input -> '%' [ Flag+ ] [ WidthAndPrecision ] [ Index ] Verb
 package printf
 
 import (

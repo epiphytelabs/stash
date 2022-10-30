@@ -19,6 +19,7 @@ import (
 
 // NewConst returns a new constant of the specified value and type.
 // val must be valid according to the specification of Const.Value.
+//
 func NewConst(val constant.Value, typ types.Type) *Const {
 	return &Const{
 		register: register{
@@ -36,6 +37,7 @@ func intConst(i int64) *Const {
 
 // nilConst returns a nil constant of the specified type, which may
 // be any reference type, including interfaces.
+//
 func nilConst(typ types.Type) *Const {
 	return NewConst(nil, typ)
 }
@@ -187,6 +189,7 @@ func (c *Const) IsNil() bool {
 
 // Int64 returns the numeric value of this constant truncated to fit
 // a signed 64-bit integer.
+//
 func (c *Const) Int64() int64 {
 	switch x := constant.ToInt(c.Value); x.Kind() {
 	case constant.Int:
@@ -203,6 +206,7 @@ func (c *Const) Int64() int64 {
 
 // Uint64 returns the numeric value of this constant truncated to fit
 // an unsigned 64-bit integer.
+//
 func (c *Const) Uint64() uint64 {
 	switch x := constant.ToInt(c.Value); x.Kind() {
 	case constant.Int:
@@ -219,6 +223,7 @@ func (c *Const) Uint64() uint64 {
 
 // Float64 returns the numeric value of this constant truncated to fit
 // a float64.
+//
 func (c *Const) Float64() float64 {
 	f, _ := constant.Float64Val(c.Value)
 	return f
@@ -226,6 +231,7 @@ func (c *Const) Float64() float64 {
 
 // Complex128 returns the complex value of this constant truncated to
 // fit a complex128.
+//
 func (c *Const) Complex128() complex128 {
 	re, _ := constant.Float64Val(constant.Real(c.Value))
 	im, _ := constant.Float64Val(constant.Imag(c.Value))

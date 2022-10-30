@@ -9,7 +9,7 @@ import (
 
 const repeatMatcherName = "REPEAT"
 
-// FilterRepeatMatcher can be pass to zxcvbn-go.PasswordStrength to skip that matcher
+//FilterRepeatMatcher can be pass to zxcvbn-go.PasswordStrength to skip that matcher
 func FilterRepeatMatcher(m match.Matcher) bool {
 	return m.ID == repeatMatcherName
 }

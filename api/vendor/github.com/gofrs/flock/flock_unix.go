@@ -2,7 +2,6 @@
 // Use of this source code is governed by the BSD 3-Clause
 // license that can be found in the LICENSE file.
 
-//go:build !aix && !windows
 // +build !aix,!windows
 
 package flock
@@ -172,9 +171,8 @@ retry:
 
 // reopenFDOnError determines whether we should reopen the file handle
 // in readwrite mode and try again. This comes from util-linux/sys-utils/flock.c:
-//
-//	Since Linux 3.4 (commit 55725513)
-//	Probably NFSv4 where flock() is emulated by fcntl().
+//  Since Linux 3.4 (commit 55725513)
+//  Probably NFSv4 where flock() is emulated by fcntl().
 func (f *Flock) reopenFDOnError(err error) (bool, error) {
 	if err != syscall.EIO && err != syscall.EBADF {
 		return false, nil

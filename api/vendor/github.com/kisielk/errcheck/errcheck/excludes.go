@@ -56,6 +56,7 @@ var (
 // patterns for which to allow unchecked errors.
 //
 // Lines that start with two forward slashes are considered comments and are ignored.
+//
 func ReadExcludes(path string) ([]string, error) {
 	var excludes []string
 
