@@ -30,9 +30,6 @@ deploy:
 lint:
 	go run ./vendor/github.com/golangci/golangci-lint/cmd/golangci-lint/main.go run
 
-mail:
-	cat example/mail | sed -e "s|%%DATE%%|$(shell date '+%Y-%m-%d %H:%M:%S')|" | nc localhost 25
-
 test:
 	env TEST=true go test -covermode atomic -coverprofile coverage.txt -mod=vendor ./...
 

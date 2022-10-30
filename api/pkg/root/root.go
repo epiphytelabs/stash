@@ -64,7 +64,7 @@ func (fs FS) Remove(path string) error {
 func (fs FS) Stat(path string) (os.FileInfo, error) {
 	info, err := os.Stat(fs.file(path))
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err //nolint:wrapcheck
 	}
 
 	return info, nil

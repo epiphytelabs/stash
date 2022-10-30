@@ -41,5 +41,7 @@ RUN npx vite build
 
 FROM nginx
 
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
 COPY --from=package /src/nginx.conf /etc/nginx/nginx.conf
 COPY --from=package /src/dist /usr/share/nginx/html

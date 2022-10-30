@@ -74,9 +74,9 @@ services:
   smtpd:
     build:
       context: apps/smtpd
+    environment:
+      STASH: https://api:4000
     labels:
       - "traefik.tcp.routers.smtpd.entrypoints=smtp"
       - "traefik.tcp.routers.smtpd.rule=HostSNI(`*`)"
     restart: unless-stopped
-    volumes:
-      - ./db:/db

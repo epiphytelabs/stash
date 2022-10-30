@@ -15,7 +15,7 @@ func main() {
 }
 
 func run() error {
-	s, err := smtpd.New("./db")
+	s, err := smtpd.New(os.Getenv("STASH") + "/api")
 	if err != nil {
 		return err
 	}

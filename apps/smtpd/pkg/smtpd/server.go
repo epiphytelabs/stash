@@ -5,26 +5,26 @@ import (
 	"time"
 
 	"github.com/emersion/go-smtp"
-	"github.com/epiphytelabs/stash/pkg/store"
+	"github.com/epiphytelabs/stash/api/client"
 	"github.com/pkg/errors"
 )
 
 type Server struct {
-	store *store.Store
+	stash *client.Client
 }
 
-func New(base string) (*Server, error) {
-	s, err := store.New(base)
+func New(url string) (*Server, error) {
+	c, err := client.New(url)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewWithStore(s)
+	return NewWithStash(c)
 }
 
-func NewWithStore(store *store.Store) (*Server, error) {
+func NewWithStash(stash *client.Client) (*Server, error) {
 	s := &Server{
-		store: store,
+		stash: stash,
 	}
 
 	return s, nil
@@ -46,9 +46,9 @@ func (s *Server) Listen(addr string) error {
 }
 
 func (s *Server) AnonymousLogin(state *smtp.ConnectionState) (smtp.Session, error) {
-	return &Session{store: s.store}, nil
+	return &Session{stash: s.stash}, nil
 }
 
 func (s *Server) Login(state *smtp.ConnectionState, username, password string) (smtp.Session, error) {
-	return &Session{store: s.store}, nil
+	return &Session{stash: s.stash}, nil
 }

@@ -1,15 +1,16 @@
 package smtpd
 
 import (
+	"fmt"
 	"io"
 	"log"
 
 	"github.com/emersion/go-smtp"
-	"github.com/epiphytelabs/stash/pkg/store"
+	"github.com/epiphytelabs/stash/api/client"
 )
 
 type Session struct {
-	store *store.Store
+	stash *client.Client
 	from  string
 	to    string
 }
@@ -27,7 +28,7 @@ func (s *Session) Rcpt(to string) error {
 func (s *Session) Data(r io.Reader) error {
 	log.Printf("ns=smtpd at=data from=%q to=%q\n", s.from, s.to)
 
-	b, err := s.store.BlobCreate(r)
+	b, err := s.stash.BlobCreate(r)
 	if err != nil {
 		return err
 	}
@@ -40,7 +41,9 @@ func (s *Session) Data(r io.Reader) error {
 		"to":     {s.to},
 	}
 
-	if err := s.store.LabelCreate(b.Hash, labels); err != nil {
+	fmt.Printf("b.Hash: %+v\n", b.Hash)
+
+	if err := s.stash.LabelCreate(b.Hash, labels); err != nil {
 		return err
 	}
 

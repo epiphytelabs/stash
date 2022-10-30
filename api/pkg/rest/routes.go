@@ -14,7 +14,5 @@ func (r *REST) Routes(router *stdapi.Router) {
 	router.Route("GET", "/blobs/{hash}/labels/{key:.*}", r.LabelGet)
 	router.Route("DELETE", "/blobs/{hash}/labels", r.LabelDelete)
 
-	router.Route("GET", "/blobs/{hash}/tokens", r.TokenList)
-
 	router.Route("POST", "/users", r.UserCreate)
 }

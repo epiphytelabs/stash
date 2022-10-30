@@ -27,4 +27,3 @@ services:
       target: development
     volumes:
       - ./apps/smtpd:/src
-      - ./db:/src/db
