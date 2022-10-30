@@ -18,8 +18,8 @@ type Message struct {
 
 func (m *Model) MessageList(to string) ([]Message, error) {
 	search := store.Labels{
-		"label[domain]": {"message"},
-		"label[to]":     {to},
+		"domain": {"message"},
+		"to":     {to},
 	}
 
 	bs, err := m.store.BlobList(search)

@@ -200,37 +200,21 @@ func TestBlobListLabels(t *testing.T) {
 		var actual []store.Blob
 
 		expected1 := []store.Blob{*b2, *b1}
-		opts1 := stdsdk.RequestOptions{Query: stdsdk.Query{"label[key]": "val2"}}
+		opts1 := stdsdk.RequestOptions{Query: stdsdk.Query{"key": "val2"}}
 		err = h.client.Get("/blobs", opts1, &actual)
 		assert.NoError(t, err)
 		assert.Equal(t, expected1, actual)
 
 		expected2 := []store.Blob{*b3, *b2}
-		opts2 := stdsdk.RequestOptions{Query: stdsdk.Query{"label[key]": []string{"val3", "val4"}}}
+		opts2 := stdsdk.RequestOptions{Query: stdsdk.Query{"key": []string{"val3", "val4"}}}
 		err = h.client.Get("/blobs", opts2, &actual)
 		assert.NoError(t, err)
 		assert.Equal(t, expected2, actual)
 
 		expected3 := []store.Blob{}
-		opts3 := stdsdk.RequestOptions{Query: stdsdk.Query{"label[other]": "foo"}}
+		opts3 := stdsdk.RequestOptions{Query: stdsdk.Query{"other": "foo"}}
 		err = h.client.Get("/blobs", opts3, &actual)
 		assert.NoError(t, err)
 		assert.Equal(t, expected3, actual)
-
-		expected4 := []store.Blob{*b2, *b1}
-		opts4 := stdsdk.RequestOptions{Query: stdsdk.Query{"search": "bar"}}
-		err = h.client.Get("/blobs", opts4, &actual)
-		assert.NoError(t, err)
-		assert.Equal(t, expected4, actual)
-
-		expected5 := []store.Blob{*b2}
-		opts5 := stdsdk.RequestOptions{Query: stdsdk.Query{"label[key]": "val4", "search": "bar"}}
-		err = h.client.Get("/blobs", opts5, &actual)
-		assert.NoError(t, err)
-		assert.Equal(t, expected5, actual)
-
-		opts6 := stdsdk.RequestOptions{Query: stdsdk.Query{"unknown": "foo"}}
-		err = h.client.Get("/blobs", opts6, &actual)
-		assert.EqualError(t, err, "invalid query: unknown")
 	})
 }

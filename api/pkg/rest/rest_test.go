@@ -36,7 +36,7 @@ func testServer(t *testing.T, fn func(*helpers)) {
 	ht := httptest.NewServer(r)
 	defer ht.Close()
 
-	c, err := stdsdk.New(ht.URL)
+	c, err := stdsdk.New(ht.URL + "/api")
 	require.NoError(t, err)
 
 	h := &helpers{

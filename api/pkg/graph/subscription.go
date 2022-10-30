@@ -26,7 +26,7 @@ func (g *Graph) typeChanged(ctx context.Context, name string, rch chan graphql.I
 	t := time.NewTicker(time.Second)
 	defer t.Stop()
 
-	query := map[string][]string{"label[domain]": {name}}
+	query := map[string][]string{"domain": {name}}
 	since := time.Now().UTC()
 
 	for {

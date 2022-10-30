@@ -38,7 +38,7 @@ func (fs FS) Exists(path string) (bool, error) {
 func (fs FS) Open(path string) (*os.File, error) {
 	fd, err := os.Open(fs.file(path))
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err //nolint:wrapcheck
 	}
 
 	return fd, nil

@@ -6,7 +6,6 @@ import (
 	"io"
 	"os"
 	"regexp"
-	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -207,22 +206,10 @@ func blobLabelQuery(labels map[string][]string) (string, []any, error) {
 	query := ""
 
 	for key, values := range labels {
-		if key == "search" {
-			if len(values) == 1 {
-				for _, token := range strings.Fields(values[0]) {
-					query += fmt.Sprintf(" INNER JOIN tokens AS tk%d ON tk%d.hash = blobs.hash AND LOWER(tk%d.token) LIKE ?", idx["token"], idx["token"], idx["token"])
-					args = append(args, fmt.Sprintf("%%%s%%", strings.ToLower(token)))
-					idx["token"]++
-				}
-			}
-		} else if m := queryLabel.FindStringSubmatch(key); len(m) > 1 {
-			for _, value := range values {
-				query += fmt.Sprintf(" INNER JOIN labels AS lbl%d ON lbl%d.hash = blobs.hash AND lbl%d.key = ? AND lbl%d.value = ?", idx["label"], idx["label"], idx["label"], idx["label"])
-				args = append(args, m[1], value)
-				idx["label"]++
-			}
-		} else {
-			return "", nil, errors.Errorf("invalid query: %s", key)
+		for _, value := range values {
+			query += fmt.Sprintf(" INNER JOIN labels AS lbl%d ON lbl%d.hash = blobs.hash AND lbl%d.key = ? AND lbl%d.value = ?", idx["label"], idx["label"], idx["label"], idx["label"])
+			args = append(args, key, value)
+			idx["label"]++
 		}
 	}
 
