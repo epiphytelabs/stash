@@ -4,7 +4,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/epiphytelabs/stash/api/pkg/store"
+	"github.com/epiphytelabs/stash/api/internal/store"
 	"github.com/graph-gophers/graphql-go"
 	"github.com/pkg/errors"
 )

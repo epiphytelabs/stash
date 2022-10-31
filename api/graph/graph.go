@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/epiphytelabs/stash/api/internal/store"
 	"github.com/epiphytelabs/stash/api/pkg/settings"
-	"github.com/epiphytelabs/stash/api/pkg/store"
 	"github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/relay"
 	"github.com/graph-gophers/graphql-transport-ws/graphqlws"

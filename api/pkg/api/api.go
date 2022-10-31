@@ -6,7 +6,7 @@ import (
 
 	"github.com/ddollar/stdapi"
 	"github.com/epiphytelabs/stash/api/graph"
-	"github.com/epiphytelabs/stash/api/pkg/store"
+	"github.com/epiphytelabs/stash/api/internal/store"
 )
 
 type API struct {
