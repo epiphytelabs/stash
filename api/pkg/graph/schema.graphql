@@ -1,59 +1,35 @@
 schema {
-	mutation: Mutation
+	# mutation: Mutation
 	query: Query
-	subscription: Subscription
+	# subscription: Subscription
 }
 
-scalar Date
 scalar DateTime
 
-type Mutation {
-	register(id: String!, password: String!): String!
+# type Mutation {
+# }
+
+input LabelInput {
+	key: String!
+	values: [String!]!
 }
 
 type Query {
-	blobs: [Blob!]!
-	# messages: [Message!]!
-	# message(hash: ID!): Message!
-	threads: [Thread!]!
-	user: User
+	blob(id: ID!): Blob!
+	blobs(labels: [LabelInput!]): [Blob!]!
 }
 
-type Subscription {
-	type_changed(name: String!): ID!
-}
+# type Subscription {
+# }
 
 type Blob {
-	hash: ID!
 	created: DateTime!
+	data: String!
+	hash: ID!
+	labels: [Label!]!
 }
 
-type Message {
-	body: MessageBody!
-	from: MessageAddress!
-	received: DateTime!
-	subject: String!
-}
-
-type MessageAddress {
-	address: String!
-	display: String!
-	name: String!
-}
-
-type MessageBody {
-	html: String!
-	text: String!
-}
-
-type Thread {
-	id: ID!
-	messages: [Message!]!
-	participants: [MessageAddress!]!
-	subject: String!
-	updated: DateTime!
-}
-
-type User {
-	id: ID!
+type Label {
+	key: String!
+	values: [String!]!
 }

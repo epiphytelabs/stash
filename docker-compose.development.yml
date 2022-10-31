@@ -7,8 +7,6 @@ services:
   api:
     build:
       target: development
-    environment:
-      - MODE=development
     volumes:
       - ./api:/src
       - ./db:/src/db

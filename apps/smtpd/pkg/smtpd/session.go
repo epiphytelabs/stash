@@ -1,7 +1,6 @@
 package smtpd
 
 import (
-	"fmt"
 	"io"
 	"log"
 
@@ -40,8 +39,6 @@ func (s *Session) Data(r io.Reader) error {
 		"from":   {s.from},
 		"to":     {s.to},
 	}
-
-	fmt.Printf("b.Hash: %+v\n", b.Hash)
 
 	if err := s.stash.LabelCreate(b.Hash, labels); err != nil {
 		return err

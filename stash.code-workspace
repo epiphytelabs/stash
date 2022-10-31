@@ -8,6 +8,10 @@
 			"path": "api"
 		},
 		{
+			"name": "api/client",
+			"path": "api/client"
+		},
+		{
 			"name": "apps/messages",
 			"path": "apps/messages"
 		},

@@ -54,13 +54,15 @@ services:
       - ./db:/db
   messages:
     build:
-      args:
-        DOMAIN: ${DOMAIN:-stash.localhost}
       context: apps/messages
     labels:
+      - "traefik.http.middlewares.pass-client-cert.passtlsclientcert.pem=false"
+      - "traefik.http.middlewares.pass-client-cert.passtlsclientcert.info.subject.commonname=true"
       - "traefik.http.routers.messages.entrypoints=https"
+      - "traefik.http.routers.messages.middlewares=pass-client-cert"
       - "traefik.http.routers.messages.rule=Host(`${DOMAIN:-stash.localhost}`) && PathPrefix(`/apps/messages/`)"
       - "traefik.http.routers.messages.tls=true"
+      - "traefik.http.services.messages.loadbalancer.server.scheme=https"
   register:
     build:
       args:

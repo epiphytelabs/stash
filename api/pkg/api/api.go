@@ -6,14 +6,12 @@ import (
 
 	"github.com/ddollar/stdapi"
 	"github.com/epiphytelabs/stash/api/pkg/graph"
-	"github.com/epiphytelabs/stash/api/pkg/rest"
 	"github.com/epiphytelabs/stash/api/pkg/store"
 )
 
 type API struct {
 	*stdapi.Server
 	graph *graph.Graph
-	rest  *rest.REST
 }
 
 func New(base string) (*API, error) {
@@ -31,15 +29,9 @@ func NewWithStore(s *store.Store) (*API, error) {
 		return nil, err
 	}
 
-	r, err := rest.New(s)
-	if err != nil {
-		return nil, err
-	}
-
 	a := &API{
 		Server: stdapi.New("stash", "stash"),
 		graph:  g,
-		rest:   r,
 	}
 
 	a.Router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -56,14 +48,13 @@ func NewWithStore(s *store.Store) (*API, error) {
 	// a.Router.PathPrefix("/graphql").Handler(auth(g))
 	// a.Router.PathPrefix("/").Handler(auth(r))
 
-	a.Router.PathPrefix("/api").Handler(r)
 	a.Router.PathPrefix("/graph").Handler(g)
 
 	return a, nil
 }
 
 func (a *API) Close() error {
-	if err := a.rest.Close(); err != nil {
+	if err := a.graph.Close(); err != nil {
 		return err
 	}
 

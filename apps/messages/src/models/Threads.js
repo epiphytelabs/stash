@@ -18,21 +18,19 @@ export default function (params) {
 							text
 						}
 						from {
-							address
-							name
+							display
 						}
 						received
 						subject
 					}
-					participants {
-						display
-					}
-					subject
 					updated
 				}
 			}
 		`,
-		params
+		params,
+		{
+			errorPolicy: "all",
+		}
 	);
 
 	watchType("message", query.refetch);

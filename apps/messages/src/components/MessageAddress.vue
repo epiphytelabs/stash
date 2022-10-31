@@ -3,8 +3,8 @@ import { computed } from "vue";
 
 const props = defineProps(["address"]);
 
-const name = computed(() => props.address.name);
-const address = computed(() => props.address.address);
+const name = computed(() => props.address?.name);
+const address = computed(() => props.address?.address);
 </script>
 
 <template>

@@ -8,12 +8,11 @@ import (
 	"net"
 	"net/http"
 	"net/url"
-	"regexp"
 
-	"github.com/epiphytelabs/stash/api/pkg/model"
 	"github.com/epiphytelabs/stash/api/pkg/settings"
 	"github.com/epiphytelabs/stash/api/pkg/store"
 	"github.com/graph-gophers/graphql-go"
+	"github.com/graph-gophers/graphql-go/relay"
 	"github.com/graph-gophers/graphql-transport-ws/graphqlws"
 	"github.com/pkg/errors"
 )
@@ -27,7 +26,6 @@ var schema string
 
 type Graph struct {
 	handler http.Handler
-	model   *model.Model
 	store   *store.Store
 }
 
@@ -36,13 +34,7 @@ type stackTracer interface {
 }
 
 func New(s *store.Store) (*Graph, error) {
-	m, err := model.New(s)
-	if err != nil {
-		return nil, err
-	}
-
 	g := &Graph{
-		model: m,
 		store: s,
 	}
 
@@ -52,8 +44,8 @@ func New(s *store.Store) (*Graph, error) {
 	}
 
 	opts := graphqlws.WithContextGenerator(g)
-	// g.handler = graphqlws.NewHandlerFunc(schema, &relay.Handler{Schema: schema}, opts) // support http fallback
-	g.handler = graphqlws.NewHandlerFunc(schema, nil, opts)
+	g.handler = graphqlws.NewHandlerFunc(schema, &relay.Handler{Schema: schema}, opts) // support http fallback
+	// g.handler = graphqlws.NewHandlerFunc(schema, nil, opts)
 
 	return g, nil
 }
@@ -65,6 +57,14 @@ func (g *Graph) BuildContext(ctx context.Context, r *http.Request) (context.Cont
 	}
 
 	return context.WithValue(ctx, contextClientCertificate, info), nil
+}
+
+func (g *Graph) Close() error {
+	if err := g.store.Close(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (g *Graph) Hijack() (net.Conn, *bufio.ReadWriter, error) {
@@ -96,22 +96,22 @@ func (g *Graph) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-var subjectParser = regexp.MustCompile(`^Subject="CN=(.*)"$`)
+// var subjectParser = regexp.MustCompile(`^Subject="CN=(.*)"$`)
 
-func (g *Graph) user(ctx context.Context) (string, error) {
-	info, ok := ctx.Value(contextClientCertificate).(string)
-	if !ok {
-		return "", errors.Errorf("no client certificate")
-	}
+// func (g *Graph) user(ctx context.Context) (string, error) {
+// 	info, ok := ctx.Value(contextClientCertificate).(string)
+// 	if !ok {
+// 		return "", errors.Errorf("no client certificate")
+// 	}
 
-	m := subjectParser.FindStringSubmatch(info)
+// 	m := subjectParser.FindStringSubmatch(info)
 
-	if len(m) > 1 {
-		return m[1], nil
-	}
+// 	if len(m) > 1 {
+// 		return m[1], nil
+// 	}
 
-	return "", errors.Errorf("no user found in certificate")
-}
+// 	return "", errors.Errorf("no user found in certificate")
+// }
 
 func errorTracer(err error) map[string]interface{} {
 	if settings.Development {

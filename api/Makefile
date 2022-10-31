@@ -1,7 +1,6 @@
 .PHONY: all binaries ca compress deploy lint mail test vendor
 
 commands = api
-image    = epiphytelabs/stash
 
 binaries = $(addprefix dist/, $(commands))
 

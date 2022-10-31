@@ -1,0 +1,42 @@
+schema {
+	mutation: Mutation
+	query: Query
+	subscription: Subscription
+}
+
+scalar Date
+scalar DateTime
+
+type Mutation {
+}
+
+type Query {
+	threads: [Thread]!
+}
+
+type Subscription {
+}
+
+type Message {
+	body: MessageBody!
+	from: MessageAddress
+	received: DateTime!
+	subject: String!
+}
+
+type MessageAddress {
+	address: String!
+	display: String!
+	name: String!
+}
+
+type MessageBody {
+	html: String!
+	text: String!
+}
+
+type Thread {
+	id: ID!
+	messages: [Message!]!
+	updated: DateTime!
+}

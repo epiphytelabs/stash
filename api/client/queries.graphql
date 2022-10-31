@@ -1,0 +1,27 @@
+query blobData($id: ID!) {
+	blob(id: $id) {
+		data
+	}
+}
+
+query blobGet($id: ID!) {
+	blob(id: $id) {
+		created
+		hash
+		labels {
+			key
+			values
+		}
+	}
+}
+
+query blobList($labels: [LabelInput!]) {
+	blobs(labels: $labels) {
+		created
+		hash
+		labels {
+			key
+			values
+		}
+	}
+}

@@ -5,14 +5,9 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"regexp"
 	"time"
 
 	"github.com/pkg/errors"
-)
-
-var (
-	queryLabel = regexp.MustCompile(`label\[([^\]]+)\]`)
 )
 
 type Blob struct {
@@ -118,7 +113,7 @@ func (s *Store) BlobGet(hash string) (io.ReadCloser, error) {
 	return f, nil
 }
 
-func (s *Store) BlobList(labels map[string][]string) ([]Blob, error) {
+func (s *Store) BlobList(labels Labels) ([]Blob, error) {
 	query := "SELECT DISTINCT blobs.hash, blobs.created from blobs"
 
 	ql, args, err := blobLabelQuery(labels)

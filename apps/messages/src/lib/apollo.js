@@ -22,9 +22,11 @@ import { watch } from "vue";
 // 	uri: import.meta.env.VITE_API_ENDPOINT,
 // });
 
+console.log(window.location);
+
 import { WebSocketLink } from "@apollo/client/link/ws";
 const wsLink = new WebSocketLink({
-	uri: import.meta.env.VITE_API_ENDPOINT.replace("https://", "wss://"),
+	uri: `wss://${window.location.hostname}/apps/messages/graph`,
 	options: {
 		reconnect: true,
 		connectionParams: {

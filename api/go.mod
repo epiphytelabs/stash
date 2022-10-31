@@ -3,10 +3,9 @@ module github.com/epiphytelabs/stash/api
 go 1.19
 
 require (
+	github.com/Khan/genqlient v0.5.0
 	github.com/cespare/reflex v0.3.1
-	github.com/ddollar/logger v0.0.0-20180522214415-e39179955b52
 	github.com/ddollar/stdapi v1.0.3
-	github.com/ddollar/stdsdk v1.0.3
 	github.com/golangci/golangci-lint v1.50.1
 	github.com/goware/modvendor v0.5.0
 	github.com/graph-gophers/graphql-go v1.4.0
@@ -14,9 +13,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.15
 	github.com/microcosm-cc/bluemonday v1.0.21
 	github.com/pkg/errors v0.9.1
-	github.com/stretchr/testify v1.8.0
 	github.com/vektra/mockery/v2 v2.14.0
-	software.sslmate.com/src/go-pkcs12 v0.2.0
 )
 
 require (
@@ -48,6 +45,7 @@ require (
 	github.com/curioswitch/go-reassign v0.2.0 // indirect
 	github.com/daixiang0/gci v0.8.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/ddollar/logger v0.0.0-20180522214415-e39179955b52 // indirect
 	github.com/denis-tingaikin/go-header v0.4.3 // indirect
 	github.com/esimonov/ifshort v1.0.4 // indirect
 	github.com/ettle/strcase v0.1.1 // indirect
@@ -166,6 +164,7 @@ require (
 	github.com/ssgreg/nlreturn/v2 v2.2.1 // indirect
 	github.com/stbenjam/no-sprintf-host-port v0.1.1 // indirect
 	github.com/stretchr/objx v0.4.0 // indirect
+	github.com/stretchr/testify v1.8.0 // indirect
 	github.com/subosito/gotenv v1.4.1 // indirect
 	github.com/tdakkota/asciicheck v0.1.1 // indirect
 	github.com/tetafro/godot v1.4.11 // indirect
@@ -176,6 +175,7 @@ require (
 	github.com/ultraware/funlen v0.0.3 // indirect
 	github.com/ultraware/whitespace v0.0.5 // indirect
 	github.com/uudashr/gocognit v1.0.6 // indirect
+	github.com/vektah/gqlparser/v2 v2.4.5 // indirect
 	github.com/yagipy/maintidx v1.0.0 // indirect
 	github.com/yeya24/promlinter v0.2.0 // indirect
 	gitlab.com/bosi/decorder v0.2.3 // indirect

@@ -1,7 +1,6 @@
 <script setup>
-import { computed, onMounted } from "vue";
+import { computed, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
-import ErrorMessage from "@/components/ErrorMessage.vue";
 import ThreadMessages from "@/components/ThreadMessages.vue";
 import ThreadSummary from "@/components/ThreadSummary.vue";
 import Threads from "@/models/Threads";
@@ -55,7 +54,7 @@ const thread = computed(() => {
 });
 
 const threads = computed(() => {
-	return result.value.threads;
+	return result.value?.threads.filter((t) => t);
 });
 
 const visible = function (thread) {
@@ -78,17 +77,22 @@ onMounted(() => {
 		}
 	});
 });
+
+watch(error, () => {
+	for (const e of error.value.graphQLErrors) {
+		console.log(e.message + "\n" + e.extensions?.stacktrace.join("\n"));
+	}
+});
 </script>
 
 <template>
-	<ErrorMessage v-if="error" :error="error" />
-	<div v-else-if="loading">loading</div>
+	<div v-if="loading">loading</div>
 	<div v-else class="row gx-0 gy-0" @keyup="key">
 		<div class="col-5" id="threads">
 			<ul class="list-group list-group-flush">
 				<ThreadSummary
 					@click="select(thread)"
-					v-for="thread in result?.threads"
+					v-for="thread in threads"
 					:key="thread.id"
 					:thread="thread"
 					:class="klass(thread.id)"
