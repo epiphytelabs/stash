@@ -5,7 +5,7 @@ export function day(date) {
 }
 
 export function money(amount) {
-	if (amount === -0) amount = 0;
+	if (amount === 0) amount = 0; // flip negative zero
 	return Intl.NumberFormat("en-US", { signDisplay: "auto", style: "currency", currency: "USD" }).format(amount);
 }
 

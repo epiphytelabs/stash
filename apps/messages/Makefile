@@ -11,7 +11,8 @@ compress: $(binaries)
 	upx-ucl -1 $^
 
 lint:
-	go run ./vendor/github.com/golangci/golangci-lint/cmd/golangci-lint/main.go run
+	-go run ./vendor/github.com/golangci/golangci-lint/cmd/golangci-lint/main.go run
+	-npm run lint
 
 vendor:
 	go mod tidy
