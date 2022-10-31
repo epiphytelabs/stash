@@ -1,4 +1,4 @@
-schema: ../pkg/graph/schema.graphql
+schema: ../graph/schema.graphql
 operations:
   - queries.graphql
 generated: generated.go

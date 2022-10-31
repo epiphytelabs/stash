@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/ddollar/stdapi"
-	"github.com/epiphytelabs/stash/api/pkg/graph"
+	"github.com/epiphytelabs/stash/api/graph"
 	"github.com/epiphytelabs/stash/api/pkg/store"
 )
 

@@ -163,37 +163,37 @@ func (s *Store) BlobList(labels Labels) ([]Blob, error) {
 	return blobs, nil
 }
 
-func (s *Store) BlobNew(labels map[string][]string, since time.Time) ([]Blob, error) {
-	query := "SELECT DISTINCT blobs.hash, blobs.created from blobs"
+// func (s *Store) BlobNew(labels map[string][]string, since time.Time) ([]Blob, error) {
+// 	query := "SELECT DISTINCT blobs.hash, blobs.created from blobs"
 
-	q, args, err := blobLabelQuery(labels)
-	if err != nil {
-		return nil, err
-	}
+// 	q, args, err := blobLabelQuery(labels)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	query += q
+// 	query += q
 
-	query += "WHERE created > ?"
-	args = append(args, since)
+// 	query += "WHERE created > ?"
+// 	args = append(args, since)
 
-	rows, err := s.db.Query(query, args...)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
+// 	rows, err := s.db.Query(query, args...)
+// 	if err != nil {
+// 		return nil, errors.WithStack(err)
+// 	}
 
-	blobs := []Blob{}
+// 	blobs := []Blob{}
 
-	for rows.Next() {
-		var blob Blob
-		if err := rows.Scan(&blob.Hash, &blob.Created); err != nil {
-			return nil, errors.WithStack(err)
-		}
+// 	for rows.Next() {
+// 		var blob Blob
+// 		if err := rows.Scan(&blob.Hash, &blob.Created); err != nil {
+// 			return nil, errors.WithStack(err)
+// 		}
 
-		blobs = append(blobs, blob)
-	}
+// 		blobs = append(blobs, blob)
+// 	}
 
-	return blobs, nil
-}
+// 	return blobs, nil
+// }
 
 func blobLabelQuery(labels map[string][]string) (string, []any, error) {
 	args := []any{}
