@@ -5,16 +5,16 @@ import (
 	"time"
 
 	"github.com/emersion/go-smtp"
-	"github.com/epiphytelabs/stash/api/client"
+	stash "github.com/epiphytelabs/stash/api/client"
 	"github.com/pkg/errors"
 )
 
 type Server struct {
-	stash *client.Client
+	stash *stash.Client
 }
 
 func New(url string) (*Server, error) {
-	c, err := client.New(url)
+	c, err := stash.NewClient(url)
 	if err != nil {
 		return nil, err
 	}
@@ -22,7 +22,7 @@ func New(url string) (*Server, error) {
 	return NewWithStash(c)
 }
 
-func NewWithStash(stash *client.Client) (*Server, error) {
+func NewWithStash(stash *stash.Client) (*Server, error) {
 	s := &Server{
 		stash: stash,
 	}

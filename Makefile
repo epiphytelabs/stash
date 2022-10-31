@@ -1,4 +1,4 @@
-.PHONY: all build lint mail
+.PHONY: all build lint mail vendor
 
 all: build
 
@@ -14,3 +14,8 @@ lint:
 
 mail:
 	cat example/mail | sed -e "s|%%DATE%%|$(shell date '+%Y-%m-%d %H:%M:%S')|" | nc localhost 25
+
+vendor:
+	-make -C api vendor
+	-make -C apps/messages vendor
+	-make -C apps/smtpd vendor

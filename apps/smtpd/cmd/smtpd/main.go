@@ -15,7 +15,7 @@ func main() {
 }
 
 func run() error {
-	s, err := smtpd.New(os.Getenv("STASH") + "/api")
+	s, err := smtpd.New("https://api:4000/graph")
 	if err != nil {
 		return err
 	}

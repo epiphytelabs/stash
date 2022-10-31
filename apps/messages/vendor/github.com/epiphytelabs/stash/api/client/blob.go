@@ -13,6 +13,33 @@ type Blob struct {
 	Labels  Labels
 }
 
+func (c *Client) BlobCreate(data string, labels Labels) (*Blob, error) {
+	ls := []LabelInput{}
+
+	for _, l := range labels {
+		ls = append(ls, LabelInput(l))
+	}
+
+	res, err := blobCreate(context.Background(), c.graphql, data, ls)
+	if err != nil {
+		return nil, err
+	}
+
+	rb := res.GetBlobCreate()
+
+	b := Blob{
+		Created: rb.Created,
+		Hash:    rb.Hash,
+		Labels:  Labels{},
+	}
+
+	for _, label := range rb.Labels {
+		b.Labels = append(b.Labels, Label(label))
+	}
+
+	return &b, nil
+}
+
 func (c *Client) BlobData(id string) (io.Reader, error) {
 	res, err := blobData(context.Background(), c.graphql, id)
 	if err != nil {

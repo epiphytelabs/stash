@@ -2,6 +2,7 @@ package graph
 
 import (
 	"io"
+	"strings"
 
 	"github.com/epiphytelabs/stash/api/pkg/store"
 	"github.com/graph-gophers/graphql-go"
@@ -53,6 +54,35 @@ func (g *Graph) Blobs(args BlobsArgs) ([]*Blob, error) {
 	}
 
 	return bs, nil
+}
+
+type BlobCreateArgs struct {
+	Body   string
+	Labels *[]struct {
+		Key    string
+		Values []string
+	}
+}
+
+func (g *Graph) BlobCreate(args BlobCreateArgs) (*Blob, error) {
+	b, err := g.store.BlobCreate(strings.NewReader(args.Body))
+	if err != nil {
+		return nil, err
+	}
+
+	labels := store.Labels{}
+
+	if args.Labels != nil {
+		for _, l := range *args.Labels {
+			labels[l.Key] = append(labels[l.Key], l.Values...)
+		}
+	}
+
+	if err := g.store.LabelCreate(b.Hash, labels); err != nil {
+		return nil, err
+	}
+
+	return &Blob{*b, g}, nil
 }
 
 func (b *Blob) Created() DateTime {

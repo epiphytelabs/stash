@@ -5,11 +5,11 @@ import (
 	"log"
 
 	"github.com/emersion/go-smtp"
-	"github.com/epiphytelabs/stash/api/client"
+	stash "github.com/epiphytelabs/stash/api/client"
 )
 
 type Session struct {
-	stash *client.Client
+	stash *stash.Client
 	from  string
 	to    string
 }
@@ -27,22 +27,33 @@ func (s *Session) Rcpt(to string) error {
 func (s *Session) Data(r io.Reader) error {
 	log.Printf("ns=smtpd at=data from=%q to=%q\n", s.from, s.to)
 
-	b, err := s.stash.BlobCreate(r)
+	data, err := io.ReadAll(r)
+	if err != nil {
+		return err
+	}
+
+	labels := stash.Labels{
+		{Key: "domain", Values: []string{"message", "email"}},
+		{Key: "from", Values: []string{s.from}},
+		{Key: "to", Values: []string{s.to}},
+	}
+
+	// labels := map[string][]string{
+	// 	"domain": {"message", "email"},
+	// 	"from":   {s.from},
+	// 	"to":     {s.to},
+	// }
+
+	b, err := s.stash.BlobCreate(string(data), labels)
 	if err != nil {
 		return err
 	}
 
 	log.Printf("ns=smtpd at=store from=%q to=%q hash=%q\n", s.from, s.to, b.Hash)
 
-	labels := map[string][]string{
-		"domain": {"message", "email"},
-		"from":   {s.from},
-		"to":     {s.to},
-	}
-
-	if err := s.stash.LabelCreate(b.Hash, labels); err != nil {
-		return err
-	}
+	// if err := s.stash.LabelCreate(b.Hash, labels); err != nil {
+	// 	return err
+	// }
 
 	return nil
 }

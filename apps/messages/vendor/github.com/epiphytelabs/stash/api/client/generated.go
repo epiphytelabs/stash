@@ -20,6 +20,18 @@ func (v *LabelInput) GetKey() string { return v.Key }
 // GetValues returns LabelInput.Values, and is useful for accessing the field via an interface.
 func (v *LabelInput) GetValues() []string { return v.Values }
 
+// __blobCreateInput is used internally by genqlient
+type __blobCreateInput struct {
+	Body   string       `json:"body"`
+	Labels []LabelInput `json:"labels"`
+}
+
+// GetBody returns __blobCreateInput.Body, and is useful for accessing the field via an interface.
+func (v *__blobCreateInput) GetBody() string { return v.Body }
+
+// GetLabels returns __blobCreateInput.Labels, and is useful for accessing the field via an interface.
+func (v *__blobCreateInput) GetLabels() []LabelInput { return v.Labels }
+
 // __blobDataInput is used internally by genqlient
 type __blobDataInput struct {
 	Id string `json:"id"`
@@ -43,6 +55,42 @@ type __blobListInput struct {
 
 // GetLabels returns __blobListInput.Labels, and is useful for accessing the field via an interface.
 func (v *__blobListInput) GetLabels() []LabelInput { return v.Labels }
+
+// blobCreateBlobCreateBlob includes the requested fields of the GraphQL type Blob.
+type blobCreateBlobCreateBlob struct {
+	Created time.Time                             `json:"created"`
+	Hash    string                                `json:"hash"`
+	Labels  []blobCreateBlobCreateBlobLabelsLabel `json:"labels"`
+}
+
+// GetCreated returns blobCreateBlobCreateBlob.Created, and is useful for accessing the field via an interface.
+func (v *blobCreateBlobCreateBlob) GetCreated() time.Time { return v.Created }
+
+// GetHash returns blobCreateBlobCreateBlob.Hash, and is useful for accessing the field via an interface.
+func (v *blobCreateBlobCreateBlob) GetHash() string { return v.Hash }
+
+// GetLabels returns blobCreateBlobCreateBlob.Labels, and is useful for accessing the field via an interface.
+func (v *blobCreateBlobCreateBlob) GetLabels() []blobCreateBlobCreateBlobLabelsLabel { return v.Labels }
+
+// blobCreateBlobCreateBlobLabelsLabel includes the requested fields of the GraphQL type Label.
+type blobCreateBlobCreateBlobLabelsLabel struct {
+	Key    string   `json:"key"`
+	Values []string `json:"values"`
+}
+
+// GetKey returns blobCreateBlobCreateBlobLabelsLabel.Key, and is useful for accessing the field via an interface.
+func (v *blobCreateBlobCreateBlobLabelsLabel) GetKey() string { return v.Key }
+
+// GetValues returns blobCreateBlobCreateBlobLabelsLabel.Values, and is useful for accessing the field via an interface.
+func (v *blobCreateBlobCreateBlobLabelsLabel) GetValues() []string { return v.Values }
+
+// blobCreateResponse is returned by blobCreate on success.
+type blobCreateResponse struct {
+	BlobCreate blobCreateBlobCreateBlob `json:"blobCreate"`
+}
+
+// GetBlobCreate returns blobCreateResponse.BlobCreate, and is useful for accessing the field via an interface.
+func (v *blobCreateResponse) GetBlobCreate() blobCreateBlobCreateBlob { return v.BlobCreate }
 
 // blobDataBlob includes the requested fields of the GraphQL type Blob.
 type blobDataBlob struct {
@@ -131,6 +179,45 @@ type blobListResponse struct {
 
 // GetBlobs returns blobListResponse.Blobs, and is useful for accessing the field via an interface.
 func (v *blobListResponse) GetBlobs() []blobListBlobsBlob { return v.Blobs }
+
+func blobCreate(
+	ctx context.Context,
+	client graphql.Client,
+	body string,
+	labels []LabelInput,
+) (*blobCreateResponse, error) {
+	req := &graphql.Request{
+		OpName: "blobCreate",
+		Query: `
+mutation blobCreate ($body: String!, $labels: [LabelInput!]) {
+	blobCreate(body: $body, labels: $labels) {
+		created
+		hash
+		labels {
+			key
+			values
+		}
+	}
+}
+`,
+		Variables: &__blobCreateInput{
+			Body:   body,
+			Labels: labels,
+		},
+	}
+	var err error
+
+	var data blobCreateResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
 
 func blobData(
 	ctx context.Context,

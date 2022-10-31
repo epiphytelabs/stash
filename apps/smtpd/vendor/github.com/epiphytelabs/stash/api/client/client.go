@@ -1,19 +1,26 @@
 package client
 
 import (
-	"github.com/ddollar/stdsdk"
-	"github.com/pkg/errors"
+	"crypto/tls"
+	"net/http"
+
+	"github.com/Khan/genqlient/graphql"
 )
 
 type Client struct {
-	*stdsdk.Client
+	graphql graphql.Client
 }
 
-func New(url string) (*Client, error) {
-	c, err := stdsdk.New(url)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
+func NewClient(endpoint string) (*Client, error) {
+	gc := graphql.NewClient(endpoint, &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		},
+	})
 
-	return &Client{c}, nil
+	return &Client{graphql: gc}, nil
 }
+
+//go:generate go run github.com/Khan/genqlient genqlient.yml

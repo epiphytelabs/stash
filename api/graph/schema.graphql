@@ -1,17 +1,18 @@
 schema {
-	# mutation: Mutation
+	mutation: Mutation
 	query: Query
 	# subscription: Subscription
 }
 
 scalar DateTime
 
-# type Mutation {
-# }
-
 input LabelInput {
 	key: String!
 	values: [String!]!
+}
+
+type Mutation {
+	blobCreate(body: String!, labels: [LabelInput!]): Blob!
 }
 
 type Query {
