@@ -46,7 +46,7 @@ func (s *Store) BlobCreate(r io.Reader) (*Blob, error) {
 		return nil, errors.WithStack(err)
 	}
 
-	return s.BlobMetadata(hash)
+	return s.BlobGet(hash)
 }
 
 func (s *Store) BlobDelete(hash string) error {
@@ -78,6 +78,23 @@ func (s *Store) BlobDelete(hash string) error {
 	return nil
 }
 
+func (s *Store) BlobData(hash string) (io.ReadCloser, error) {
+	if err := hashValidate(hash); err != nil {
+		return nil, err
+	}
+
+	file := hashFile(hash)
+
+	f, err := s.fs.Open(file)
+	if os.IsNotExist(err) {
+		return nil, ErrHashNotFound
+	} else if err != nil {
+		return nil, err
+	}
+
+	return f, nil
+}
+
 func (s *Store) BlobExists(hash string) error {
 	if err := hashValidate(hash); err != nil {
 		return err
@@ -96,21 +113,24 @@ func (s *Store) BlobExists(hash string) error {
 	return nil
 }
 
-func (s *Store) BlobGet(hash string) (io.ReadCloser, error) {
-	if err := hashValidate(hash); err != nil {
-		return nil, err
+func (s *Store) BlobGet(hash string) (*Blob, error) {
+	rows, err := s.db.Query("SELECT created FROM blobs WHERE hash = ?", hash)
+	if err != nil {
+		return nil, errors.WithStack(err)
 	}
+	defer rows.Close()
 
-	file := hashFile(hash)
-
-	f, err := s.fs.Open(file)
-	if os.IsNotExist(err) {
+	if !rows.Next() {
 		return nil, ErrHashNotFound
-	} else if err != nil {
-		return nil, err
 	}
 
-	return f, nil
+	blob := Blob{Hash: hash}
+
+	if err := rows.Scan(&blob.Created); err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	return &blob, nil
 }
 
 func (s *Store) BlobList(labels Labels) ([]Blob, error) {
@@ -141,26 +161,6 @@ func (s *Store) BlobList(labels Labels) ([]Blob, error) {
 	}
 
 	return blobs, nil
-}
-
-func (s *Store) BlobMetadata(hash string) (*Blob, error) {
-	rows, err := s.db.Query("SELECT created FROM blobs WHERE hash = ?", hash)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	defer rows.Close()
-
-	if !rows.Next() {
-		return nil, ErrHashNotFound
-	}
-
-	blob := Blob{Hash: hash}
-
-	if err := rows.Scan(&blob.Created); err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	return &blob, nil
 }
 
 func (s *Store) BlobNew(labels map[string][]string, since time.Time) ([]Blob, error) {

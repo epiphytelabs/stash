@@ -18,7 +18,7 @@ type BlobArgs struct {
 }
 
 func (g *Graph) Blob(args BlobArgs) (*Blob, error) {
-	b, err := g.store.BlobMetadata(string(args.ID))
+	b, err := g.store.BlobGet(string(args.ID))
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +60,7 @@ func (b *Blob) Created() DateTime {
 }
 
 func (b *Blob) Data() (string, error) {
-	r, err := b.g.store.BlobGet(b.blob.Hash)
+	r, err := b.g.store.BlobData(b.blob.Hash)
 	if err != nil {
 		return "", err
 	}

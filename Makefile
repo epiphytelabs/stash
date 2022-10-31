@@ -1,6 +1,11 @@
-.PHONY: lint mail
+.PHONY: all build lint mail
 
-all:
+all: build
+
+build:
+	-make -C api
+	-make -C apps/messages
+	-make -C apps/smtpd
 
 lint:
 	-make -C api lint
