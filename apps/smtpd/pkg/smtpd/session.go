@@ -44,6 +44,9 @@ func (s *Session) Data(r io.Reader) error {
 	if err != nil {
 		return errors.WithStack(err)
 	}
+	if from == nil {
+		return errors.New("missing from address")
+	}
 
 	labels := stash.Labels{
 		{Key: "domain", Values: []string{"message", "email"}},
