@@ -4,12 +4,14 @@ go 1.19
 
 require (
 	github.com/Khan/genqlient v0.5.0
+	github.com/alecthomas/participle/v2 v2.0.0-beta.5
 	github.com/cespare/reflex v0.3.1
 	github.com/ddollar/stdapi v1.0.3
 	github.com/golangci/golangci-lint v1.50.1
 	github.com/goware/modvendor v0.5.0
 	github.com/graph-gophers/graphql-go v1.4.0
 	github.com/graph-gophers/graphql-transport-ws v0.0.2
+	github.com/hasura/go-graphql-client v0.8.1
 	github.com/mattn/go-sqlite3 v1.14.15
 	github.com/microcosm-cc/bluemonday v1.0.21
 	github.com/pkg/errors v0.9.1
@@ -79,6 +81,7 @@ require (
 	github.com/golangci/revgrep v0.0.0-20220804021717-745bb2f7c2e6 // indirect
 	github.com/golangci/unconvert v0.0.0-20180507085042-28b1c447d1f4 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
+	github.com/google/uuid v1.3.0 // indirect
 	github.com/gordonklaus/ineffassign v0.0.0-20210914165742-4cc7213b9bc8 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
@@ -103,6 +106,7 @@ require (
 	github.com/kisielk/errcheck v1.6.2 // indirect
 	github.com/kisielk/gotool v1.0.0 // indirect
 	github.com/kkHAIKE/contextcheck v1.1.3 // indirect
+	github.com/klauspost/compress v1.10.3 // indirect
 	github.com/kulti/thelper v0.6.3 // indirect
 	github.com/kunwardeep/paralleltest v1.0.6 // indirect
 	github.com/kyoh86/exportloopref v0.1.8 // indirect
@@ -204,6 +208,7 @@ require (
 	mvdan.cc/interfacer v0.0.0-20180901003855-c20040233aed // indirect
 	mvdan.cc/lint v0.0.0-20170908181259-adc824a0674b // indirect
 	mvdan.cc/unparam v0.0.0-20220706161116-678bad134442 // indirect
+	nhooyr.io/websocket v1.8.7 // indirect
 )
 
 replace github.com/graph-gophers/graphql-go => github.com/ddollar/graphql-go v1.4.0-ddollar

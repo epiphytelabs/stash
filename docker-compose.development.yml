@@ -10,18 +10,23 @@ services:
     volumes:
       - ./api:/src
       - ./db:/src/db
-  messages:
+  apps-messages:
     build:
       target: development
     volumes:
       - ./apps/messages:/src
-  register:
+  apps-register:
     build:
       target: development
     volumes:
       - ./apps/register:/src
-  smtpd:
+  apps-smtpd:
     build:
       target: development
     volumes:
       - ./apps/smtpd:/src
+  filters-email:
+    build:
+      target: development
+    volumes:
+      - ./filters/email:/src

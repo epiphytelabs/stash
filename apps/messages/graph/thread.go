@@ -2,18 +2,16 @@ package graph
 
 import (
 	"context"
-	"sort"
+	"fmt"
 	"time"
 
-	stash "github.com/epiphytelabs/stash/api/client"
-	"github.com/epiphytelabs/stash/apps/messages/pkg/message"
+	"github.com/epiphytelabs/stash/api/pkg/coalesce"
 	"github.com/graph-gophers/graphql-go"
 )
 
 type Thread struct {
-	id       string
-	messages []*Message
-	updated  time.Time
+	id string
+	g  *Graph
 }
 
 func (g *Graph) Threads(ctx context.Context) ([]*Thread, error) {
@@ -22,80 +20,85 @@ func (g *Graph) Threads(ctx context.Context) ([]*Thread, error) {
 		return nil, err
 	}
 
-	labels := []stash.Label{
-		{Key: "domain", Values: []string{"message"}},
-		{Key: "to", Values: []string{id}},
-	}
-
-	bs, err := g.stash.BlobList(labels)
+	bs, err := g.stash.BlobList(fmt.Sprintf(`domain="message" to=%q`, id))
 	if err != nil {
 		return nil, err
 	}
 
-	bsh := map[string]stash.Blob{}
-	msh := map[string]*message.Message{}
-	tsh := map[string][]string{}
+	tsh := map[string]bool{}
 
 	for _, b := range bs {
-		br, err := g.stash.BlobData(b.Hash)
-		if err != nil {
-			return nil, err
-		}
-
-		m, err := message.New(br)
-		if err != nil {
-			return nil, err
-		}
-
-		tid := m.Thread()
-
-		if _, ok := tsh[tid]; !ok {
-			tsh[tid] = []string{}
-		}
-
-		bsh[b.Hash] = b
-		msh[b.Hash] = m
-		tsh[tid] = append(tsh[tid], b.Hash)
+		tsh[coalesce.String(b.Labels.GetOne("thread"), b.Hash)] = true
 	}
 
 	ts := []*Thread{}
 
 	for tid := range tsh {
-		t := &Thread{
-			id:       tid,
-			messages: []*Message{},
-		}
-
-		for _, mid := range tsh[tid] {
-			t.messages = append(t.messages, &Message{
-				labels:   bsh[mid].Labels,
-				msg:      msh[mid],
-				received: bsh[mid].Created,
-			})
-
-			if bsh[mid].Created.After(t.updated) {
-				t.updated = bsh[mid].Created
-			}
-		}
-
-		ts = append(ts, t)
+		ts = append(ts, &Thread{tid, g})
 	}
 
-	sort.Slice(ts, func(i, j int) bool {
-		return ts[i].updated.After(ts[j].updated)
-	})
-
 	return ts, nil
+}
+
+func (g *Graph) ThreadAdded(ctx context.Context) (chan *Thread, error) {
+	id, err := g.user(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	cctx, cancel := context.WithCancel(ctx)
+
+	bch := g.stash.BlobAdded(cctx, fmt.Sprintf(`domain="message" to=%q`, id))
+
+	ch := make(chan *Thread)
+
+	go func() {
+		defer cancel()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case b := <-bch:
+				fmt.Printf("b: %+v\n", b)
+			}
+		}
+	}()
+
+	return ch, nil
 }
 
 func (t Thread) ID() graphql.ID {
 	return graphql.ID(t.id)
 }
 
-func (t Thread) Messages() []*Message {
-	return t.messages
+func (t Thread) Messages() ([]*Message, error) {
+	bs, err := t.g.stash.BlobList(fmt.Sprintf(`domain="message" thread=%q`, t.id))
+	if err != nil {
+		return nil, err
+	}
+
+	ms := []*Message{}
+
+	for _, b := range bs {
+		ms = append(ms, &Message{b, t.g})
+	}
+
+	return ms, nil
 }
 
-func (t Thread) Updated() DateTime {
-	return DateTime{t.updated}
+func (t Thread) Updated() (DateTime, error) {
+	bs, err := t.g.stash.BlobList(fmt.Sprintf(`domain="message" thread=%q`, t.id))
+	if err != nil {
+		return DateTime{}, err
+	}
+
+	var latest time.Time
+
+	for _, b := range bs {
+		if b.Created.After(latest) {
+			latest = b.Created
+		}
+	}
+
+	return DateTime{latest}, nil
 }

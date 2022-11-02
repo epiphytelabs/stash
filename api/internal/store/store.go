@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"github.com/ddollar/stdapi"
 	"github.com/epiphytelabs/stash/api/pkg/root"
@@ -15,6 +16,8 @@ import (
 type Store struct {
 	db *sql.DB
 	fs root.FS
+
+	added sync.Map
 }
 
 func New(base string) (*Store, error) {

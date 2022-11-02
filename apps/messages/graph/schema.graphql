@@ -15,6 +15,7 @@ type Query {
 }
 
 type Subscription {
+	threadAdded: Thread!
 }
 
 type Message {

@@ -15,7 +15,7 @@ func main() {
 }
 
 func run() error {
-	s, err := smtpd.New("https://api:4000/graph")
+	s, err := smtpd.New("api:4000")
 	if err != nil {
 		return err
 	}

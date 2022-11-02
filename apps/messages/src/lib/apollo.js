@@ -1,10 +1,6 @@
 import { ApolloClient, InMemoryCache } from "@apollo/client/core";
-import { useSubscription } from "@vue/apollo-composable";
-import gql from "graphql-tag";
 
 const apolloCache = new InMemoryCache();
-
-import { watch } from "vue";
 
 // import { setContext } from "@apollo/client/link/context";
 // const authLink = setContext((_, { headers }) => {
@@ -21,8 +17,6 @@ import { watch } from "vue";
 // 	credentials: "include",
 // 	uri: import.meta.env.VITE_API_ENDPOINT,
 // });
-
-console.log(window.location);
 
 import { WebSocketLink } from "@apollo/client/link/ws";
 const wsLink = new WebSocketLink({
@@ -59,20 +53,4 @@ const apolloClient = new ApolloClient({
 // 	apolloCache.writeQuery({ query: query, overwrite: true, data });
 // }
 
-function watchType(name, refetch) {
-	const { result } = useSubscription(
-		gql`
-			subscription ($name: String!) {
-				type_changed(name: $name)
-			}
-		`,
-		{
-			name: name,
-		}
-	);
-	watch(result, () => {
-		refetch();
-	});
-}
-
-export { apolloClient, apolloCache, watchType };
+export { apolloClient, apolloCache };

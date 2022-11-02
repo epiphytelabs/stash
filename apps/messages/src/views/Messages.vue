@@ -54,7 +54,7 @@ const thread = computed(() => {
 });
 
 const threads = computed(() => {
-	return result.value?.threads.filter((t) => t);
+	return result.value?.threads.filter((t) => t).sort((a, b) => b.updated.localeCompare(a.updated));
 });
 
 const visible = function (thread) {
@@ -80,7 +80,7 @@ onMounted(() => {
 
 watch(error, () => {
 	for (const e of error.value.graphQLErrors) {
-		console.log(e.message + "\n" + e.extensions?.stacktrace.join("\n"));
+		console.error(e.message + "\n" + e.extensions?.stacktrace.join("\n"));
 	}
 });
 </script>

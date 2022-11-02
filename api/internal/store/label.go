@@ -1,6 +1,7 @@
 package store
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/ddollar/stdapi"
@@ -10,6 +11,23 @@ import (
 type Labels = map[string][]string
 
 func (s *Store) LabelCreate(hash string, labels Labels) error {
+	unmatched := map[chan Blob]bool{}
+
+	// TODO use a custom map so we can handle errors better
+	s.added.Range(func(ch, query any) bool {
+		m, err := s.blobMatch(hash, query.(string))
+		if err != nil {
+			log.Printf("error: %v\n", err)
+			return true
+		}
+
+		if !m {
+			unmatched[ch.(chan Blob)] = true
+		}
+
+		return true
+	})
+
 	if err := hashValidate(hash); err != nil {
 		return err
 	}
@@ -29,6 +47,24 @@ func (s *Store) LabelCreate(hash string, labels Labels) error {
 			}
 		}
 	}
+
+	b, err := s.BlobGet(hash)
+	if err != nil {
+		return err
+	}
+
+	s.added.Range(func(ch, query any) bool {
+		m, err := s.blobMatch(hash, query.(string))
+		if err != nil {
+			log.Printf("error: %v\n", err)
+			return true
+		}
+
+		if unmatched[ch.(chan Blob)] && m {
+			ch.(chan Blob) <- *b
+		}
+		return true
+	})
 
 	return nil
 }

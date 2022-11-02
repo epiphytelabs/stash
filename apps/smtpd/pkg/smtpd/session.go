@@ -6,6 +6,7 @@ import (
 
 	"github.com/emersion/go-smtp"
 	stash "github.com/epiphytelabs/stash/api/client"
+	"github.com/pkg/errors"
 )
 
 type Session struct {
@@ -29,7 +30,7 @@ func (s *Session) Data(r io.Reader) error {
 
 	data, err := io.ReadAll(r)
 	if err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 
 	labels := stash.Labels{
@@ -38,22 +39,12 @@ func (s *Session) Data(r io.Reader) error {
 		{Key: "to", Values: []string{s.to}},
 	}
 
-	// labels := map[string][]string{
-	// 	"domain": {"message", "email"},
-	// 	"from":   {s.from},
-	// 	"to":     {s.to},
-	// }
-
 	b, err := s.stash.BlobCreate(string(data), labels)
 	if err != nil {
 		return err
 	}
 
 	log.Printf("ns=smtpd at=store from=%q to=%q hash=%q\n", s.from, s.to, b.Hash)
-
-	// if err := s.stash.LabelCreate(b.Hash, labels); err != nil {
-	// 	return err
-	// }
 
 	return nil
 }

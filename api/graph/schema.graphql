@@ -1,7 +1,7 @@
 schema {
 	mutation: Mutation
 	query: Query
-	# subscription: Subscription
+	subscription: Subscription
 }
 
 scalar DateTime
@@ -12,16 +12,19 @@ input LabelInput {
 }
 
 type Mutation {
-	blobCreate(body: String!, labels: [LabelInput!]): Blob!
+	blobCreate(data: String!, labels: [LabelInput!]): Blob!
+	labelAdd(hash: ID!, labels: [LabelInput!]!): ID!
 }
 
 type Query {
 	blob(id: ID!): Blob!
-	blobs(labels: [LabelInput!]): [Blob!]!
+	blobs(query: String!): [Blob!]!
 }
 
-# type Subscription {
-# }
+type Subscription {
+	blobAdded(query: String!): Blob!
+	blobRemoved(query: String!): ID!
+}
 
 type Blob {
 	created: DateTime!

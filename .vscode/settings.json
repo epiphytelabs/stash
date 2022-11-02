@@ -1,6 +1,7 @@
 {
 	"files.exclude": {
 		"api": true,
-		"apps": true
+		"apps": true,
+		"filters": true
 	}
 }

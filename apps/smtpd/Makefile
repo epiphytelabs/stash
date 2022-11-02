@@ -1,7 +1,6 @@
-.PHONY: all binaries compress lint release test vendor
+.PHONY: all binaries compress lint test vendor
 
 commands = smtpd
-image    = epiphytelabs/smtpd
 
 binaries = $(addprefix dist/, $(commands))
 
@@ -14,10 +13,6 @@ compress: $(binaries)
 
 lint:
 	go run ./vendor/github.com/golangci/golangci-lint/cmd/golangci-lint/main.go run
-
-release:
-	docker build -t ${image}:latest .
-	docker push ${image}:latest
 
 test:
 	env TEST=true go test -covermode atomic -coverprofile coverage.txt -mod=vendor ./...

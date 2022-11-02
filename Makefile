@@ -1,21 +1,19 @@
 .PHONY: all build lint mail vendor
 
+projects = api apps/messages apps/smtpd filters/email
+
 all: build
 
 build:
-	-make -C api
-	-make -C apps/messages
-	-make -C apps/smtpd
+	$(call make-sub)
 
 lint:
-	-make -C api lint
-	-make -C apps/messages lint
-	-make -C apps/smtpd lint
+	$(call make-sub,lint)
 
 mail:
 	cat example/mail | sed -e "s|%%DATE%%|$(shell date '+%Y-%m-%d %H:%M:%S')|" | nc localhost 25
 
 vendor:
-	-make -C api vendor
-	-make -C apps/messages vendor
-	-make -C apps/smtpd vendor
+	$(call make-sub,vendor)
+
+make-sub = @$(foreach project,$(projects),echo $(project):; make -C $(project) $(1) | sed 's/^/  /'; )

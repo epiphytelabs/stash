@@ -1,14 +1,17 @@
 package main
 
 import (
+	"embed"
 	_ "embed"
 	"fmt"
 	"io"
+	"io/fs"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/convox/stdapi"
 	stash "github.com/epiphytelabs/stash/api/client"
@@ -26,7 +29,7 @@ func main() {
 func run() error {
 	s := stdapi.New("messages", "messages")
 
-	c, err := stash.NewClient("https://api:4000/graph")
+	c, err := stash.NewClient("api:4000")
 	if err != nil {
 		return err
 	}
@@ -36,14 +39,16 @@ func run() error {
 		return err
 	}
 
-	h, err := vite()
+	v, err := vite()
 	if err != nil {
 		return err
 	}
 
 	s.Subrouter("/apps/messages", func(r *stdapi.Router) {
 		r.Router.PathPrefix("/graph").Handler(g)
-		r.Router.PathPrefix("/").Handler(h)
+		r.Router.PathPrefix("/").Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			v.ServeHTTP(w, r)
+		}))
 	})
 
 	if err := s.Listen("https", ":4000"); err != nil {
@@ -71,7 +76,7 @@ func vite() (http.Handler, error) {
 		return viteDevelopment()
 	}
 
-	return nil, nil
+	return viteProduction()
 }
 
 func viteDevelopment() (http.Handler, error) {
@@ -107,4 +112,27 @@ func viteDevelopment() (http.Handler, error) {
 	h := httputil.NewSingleHostReverseProxy(u)
 
 	return h, nil
+}
+
+//go:embed dist/*
+var dist embed.FS
+
+func viteProduction() (http.Handler, error) {
+	root, err := fs.Sub(dist, "dist")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	return http.StripPrefix("/apps/messages", viteSinglePage(root)), nil
+}
+
+func viteSinglePage(dist fs.FS) http.Handler {
+	hfs := http.FileServer(http.FS(dist))
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if _, err := dist.Open(strings.TrimPrefix(r.URL.Path, "/")); errors.Is(err, fs.ErrNotExist) {
+			r.URL.Path = "/"
+		}
+		hfs.ServeHTTP(w, r)
+	})
 }

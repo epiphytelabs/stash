@@ -1,18 +1,36 @@
 package store
 
 import (
+	"context"
 	"crypto/sha256"
 	"fmt"
 	"io"
 	"os"
 	"time"
 
+	"github.com/epiphytelabs/stash/api/pkg/search"
 	"github.com/pkg/errors"
 )
 
 type Blob struct {
 	Hash    string    `json:"hash"`
 	Created time.Time `json:"created"`
+}
+
+func (s *Store) subscribeAdd(ctx context.Context, query string, ch chan Blob) {
+	fmt.Printf("adding subscription: %v\n", query)
+	s.added.Store(ch, query)
+	<-ctx.Done()
+	fmt.Printf("removing subscription: %v\n", query)
+	s.added.Delete(ch)
+}
+
+func (s *Store) BlobAdded(ctx context.Context, query string) chan Blob {
+	ch := make(chan Blob)
+
+	go s.subscribeAdd(ctx, query, ch)
+
+	return ch
 }
 
 func (s *Store) BlobCreate(r io.Reader) (*Blob, error) {
@@ -133,18 +151,18 @@ func (s *Store) BlobGet(hash string) (*Blob, error) {
 	return &blob, nil
 }
 
-func (s *Store) BlobList(labels Labels) ([]Blob, error) {
-	query := "SELECT DISTINCT blobs.hash, blobs.created from blobs"
+func (s *Store) BlobList(query string) ([]Blob, error) {
+	q := "SELECT DISTINCT blobs.hash, blobs.created from blobs WHERE "
 
-	ql, args, err := blobLabelQuery(labels)
+	qf, args, err := blobQueryFragment(query)
 	if err != nil {
 		return nil, err
 	}
 
-	query += ql
-	query += " ORDER BY blobs.created DESC"
+	q += qf
+	q += " ORDER BY blobs.created DESC"
 
-	rows, err := s.db.Query(query, args...)
+	rows, err := s.db.Query(q, args...)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -163,50 +181,59 @@ func (s *Store) BlobList(labels Labels) ([]Blob, error) {
 	return blobs, nil
 }
 
-// func (s *Store) BlobNew(labels map[string][]string, since time.Time) ([]Blob, error) {
-// 	query := "SELECT DISTINCT blobs.hash, blobs.created from blobs"
+func (s *Store) blobMatch(hash string, query string) (bool, error) {
+	qf, args, err := blobQueryFragment(query)
+	if err != nil {
+		return false, err
+	}
 
-// 	q, args, err := blobLabelQuery(labels)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	q := "SELECT COUNT(*) AS count FROM blobs WHERE " + qf
 
-// 	query += q
+	q += " AND blobs.hash = ?"
+	args = append(args, hash)
 
-// 	query += "WHERE created > ?"
-// 	args = append(args, since)
+	rows, err := s.db.Query(q, args...)
+	if err != nil {
+		return false, errors.WithStack(err)
+	}
+	defer rows.Close()
 
-// 	rows, err := s.db.Query(query, args...)
-// 	if err != nil {
-// 		return nil, errors.WithStack(err)
-// 	}
+	if !rows.Next() {
+		return false, errors.New("no rows in result set")
+	}
 
-// 	blobs := []Blob{}
+	var count int
 
-// 	for rows.Next() {
-// 		var blob Blob
-// 		if err := rows.Scan(&blob.Hash, &blob.Created); err != nil {
-// 			return nil, errors.WithStack(err)
-// 		}
+	if err := rows.Scan(&count); err != nil {
+		return false, errors.WithStack(err)
+	}
 
-// 		blobs = append(blobs, blob)
-// 	}
+	return count > 0, nil
+}
 
-// 	return blobs, nil
-// }
+func blobQueryFragment(query string) (string, []any, error) {
+	q, err := search.Parse(query)
+	if err != nil {
+		return "", nil, err
+	}
 
-func blobLabelQuery(labels map[string][]string) (string, []any, error) {
+	fragment := "1=1"
 	args := []any{}
-	idx := map[string]int{}
-	query := ""
 
-	for key, values := range labels {
-		for _, value := range values {
-			query += fmt.Sprintf(" INNER JOIN labels AS lbl%d ON lbl%d.hash = blobs.hash AND lbl%d.key = ? AND lbl%d.value = ?", idx["label"], idx["label"], idx["label"], idx["label"])
-			args = append(args, key, value)
-			idx["label"]++
+	for _, f := range q.Fields {
+		sub := "SELECT hash FROM labels WHERE key = ? AND value = ?"
+
+		switch f.Op {
+		case "=":
+			fragment += fmt.Sprintf(" AND hash IN (%s)", sub)
+			args = append(args, f.Key, f.Value)
+		case "!=":
+			fragment += fmt.Sprintf(" AND hash NOT IN (%s)", sub)
+			args = append(args, f.Key, f.Value)
+		default:
+			return "", nil, errors.Errorf("unknown op: %s", f.Op)
 		}
 	}
 
-	return query, args, nil
+	return fragment, args, nil
 }

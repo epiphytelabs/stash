@@ -16,8 +16,16 @@
 			"path": "apps/messages"
 		},
 		{
+			"name": "apps/register",
+			"path": "apps/register"
+		},
+		{
 			"name": "apps/smtpd",
 			"path": "apps/smtpd"
+		},
+		{
+			"name": "filters/email",
+			"path": "filters/email"
 		}
 	],
 	"settings": {}

@@ -5,6 +5,9 @@ import (
 	"io"
 	"strings"
 	"time"
+
+	"github.com/hasura/go-graphql-client"
+	"github.com/pkg/errors"
 )
 
 type Blob struct {
@@ -13,89 +16,75 @@ type Blob struct {
 	Labels  Labels
 }
 
+type Subscription struct {
+	Body any
+}
+
+func (c *Client) BlobAdded(ctx context.Context, query string) <-chan Blob {
+	type subscription struct {
+		BlobAdded Blob `graphql:"blobAdded(query: $query)"`
+	}
+
+	// var res sub
+
+	vars := map[string]interface{}{
+		"query": query,
+	}
+
+	ch := make(chan Blob)
+
+	go subscribe(ctx, c.sub, vars, func(res subscription) {
+		ch <- res.BlobAdded
+	})
+
+	return ch
+}
+
 func (c *Client) BlobCreate(data string, labels Labels) (*Blob, error) {
-	ls := []LabelInput{}
-
-	for _, l := range labels {
-		ls = append(ls, LabelInput(l))
+	var res struct {
+		BlobCreate Blob `graphql:"blobCreate(data:$data, labels:$labels)"`
 	}
 
-	res, err := blobCreate(context.Background(), c.graphql, data, ls)
-	if err != nil {
-		return nil, err
+	vars := map[string]interface{}{
+		"data":   data,
+		"labels": labels.Input(),
 	}
 
-	rb := res.GetBlobCreate()
-
-	b := Blob{
-		Created: rb.Created,
-		Hash:    rb.Hash,
-		Labels:  Labels{},
+	if err := c.graphql.Mutate(context.Background(), &res, vars); err != nil {
+		return nil, errors.WithStack(err)
 	}
 
-	for _, label := range rb.Labels {
-		b.Labels = append(b.Labels, Label(label))
-	}
-
-	return &b, nil
+	return &res.BlobCreate, nil
 }
 
 func (c *Client) BlobData(id string) (io.Reader, error) {
-	res, err := blobData(context.Background(), c.graphql, id)
-	if err != nil {
-		return nil, err
+	var res struct {
+		Blob struct{ Data string } `graphql:"blob(id: $id)"`
 	}
 
-	return strings.NewReader(res.GetBlob().Data), nil
+	vars := map[string]interface{}{
+		"id": graphql.ID(id),
+	}
+
+	if err := c.graphql.Query(context.Background(), &res, vars); err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	return strings.NewReader(res.Blob.Data), nil
 }
 
-func (c *Client) BlobGet(id string) (*Blob, error) {
-	res, err := blobGet(context.Background(), c.graphql, id)
-	if err != nil {
-		return nil, err
+func (c *Client) BlobList(query string) ([]Blob, error) {
+	var res struct {
+		Blobs []Blob `graphql:"blobs(query: $query)"`
 	}
 
-	rb := res.GetBlob()
-
-	b := Blob{
-		Created: rb.Created,
-		Hash:    rb.Hash,
-		Labels:  Labels{},
+	vars := map[string]interface{}{
+		"query": query,
 	}
 
-	for _, label := range rb.Labels {
-		b.Labels = append(b.Labels, Label(label))
+	if err := c.graphql.Query(context.Background(), &res, vars); err != nil {
+		return nil, errors.WithStack(err)
 	}
 
-	return &b, nil
-}
-
-func (c *Client) BlobList(labels []Label) ([]Blob, error) {
-	ls := []LabelInput{}
-
-	for _, label := range labels {
-		ls = append(ls, LabelInput(label))
-	}
-
-	res, err := blobList(context.Background(), c.graphql, ls)
-	if err != nil {
-		return nil, err
-	}
-
-	bs := []Blob{}
-
-	for _, rb := range res.GetBlobs() {
-		b := Blob{
-			Created: rb.Created,
-			Hash:    rb.Hash,
-		}
-
-		for _, label := range rb.Labels {
-			b.Labels = append(b.Labels, Label(label))
-		}
-
-		bs = append(bs, b)
-	}
-
-	return bs, nil
+	return res.Blobs, nil
 }

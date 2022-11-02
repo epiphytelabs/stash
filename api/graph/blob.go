@@ -1,6 +1,7 @@
 package graph
 
 import (
+	"context"
 	"io"
 	"strings"
 
@@ -28,22 +29,11 @@ func (g *Graph) Blob(args BlobArgs) (*Blob, error) {
 }
 
 type BlobsArgs struct {
-	Labels *[]struct {
-		Key    string
-		Values []string
-	}
+	Query string
 }
 
 func (g *Graph) Blobs(args BlobsArgs) ([]*Blob, error) {
-	labels := store.Labels{}
-
-	if args.Labels != nil {
-		for _, l := range *args.Labels {
-			labels[l.Key] = append(labels[l.Key], l.Values...)
-		}
-	}
-
-	blobs, err := g.store.BlobList(labels)
+	blobs, err := g.store.BlobList(args.Query)
 	if err != nil {
 		return nil, err
 	}
@@ -56,8 +46,31 @@ func (g *Graph) Blobs(args BlobsArgs) ([]*Blob, error) {
 	return bs, nil
 }
 
+type BlobAddedArgs struct {
+	Query string
+}
+
+func (g *Graph) BlobAdded(ctx context.Context, args BlobAddedArgs) chan *Blob {
+	ch := make(chan *Blob)
+
+	sch := g.store.BlobAdded(ctx, args.Query)
+
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case b := <-sch:
+				ch <- &Blob{b, g}
+			}
+		}
+	}()
+
+	return ch
+}
+
 type BlobCreateArgs struct {
-	Body   string
+	Data   string
 	Labels *[]struct {
 		Key    string
 		Values []string
@@ -65,7 +78,7 @@ type BlobCreateArgs struct {
 }
 
 func (g *Graph) BlobCreate(args BlobCreateArgs) (*Blob, error) {
-	b, err := g.store.BlobCreate(strings.NewReader(args.Body))
+	b, err := g.store.BlobCreate(strings.NewReader(args.Data))
 	if err != nil {
 		return nil, err
 	}
@@ -83,6 +96,19 @@ func (g *Graph) BlobCreate(args BlobCreateArgs) (*Blob, error) {
 	}
 
 	return &Blob{*b, g}, nil
+}
+
+type BlobRemovedArgs struct {
+	Labels *[]struct {
+		Key    string
+		Values []string
+	}
+}
+
+func (g *Graph) BlobRemoved(args BlobAddedArgs) chan graphql.ID {
+	ch := make(chan graphql.ID)
+
+	return ch
 }
 
 func (b *Blob) Created() DateTime {
