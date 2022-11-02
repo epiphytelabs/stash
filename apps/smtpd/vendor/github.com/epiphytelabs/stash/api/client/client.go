@@ -48,7 +48,8 @@ func NewClient(host string) (*Client, error) {
 
 	c.sub.OnError(func(sc *graphql.SubscriptionClient, err error) error {
 		fmt.Printf("err: %+v\n", err)
-		return sc.Reset()
+		sc.Close()        //nolint:errcheck
+		return sc.Reset() //nolint:wrapcheck
 	})
 
 	return c, nil

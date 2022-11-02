@@ -38,6 +38,10 @@ github.com/ashanbrown/forbidigo/forbidigo
 # github.com/ashanbrown/makezero v1.1.1
 ## explicit; go 1.12
 github.com/ashanbrown/makezero/makezero
+# github.com/aymerick/douceur v0.2.0
+## explicit
+github.com/aymerick/douceur/css
+github.com/aymerick/douceur/parser
 # github.com/beorn7/perks v1.0.1
 ## explicit; go 1.11
 github.com/beorn7/perks/quantile
@@ -103,9 +107,14 @@ github.com/emersion/go-sasl
 # github.com/emersion/go-smtp v0.15.0
 ## explicit; go 1.13
 github.com/emersion/go-smtp
-# github.com/epiphytelabs/stash/api v0.0.0-20221030210455-12b946e4b123 => ../../api
+# github.com/epiphytelabs/stash/api v0.0.0-20221030215756-e56a56e59bc6 => ../../api
 ## explicit; go 1.19
 github.com/epiphytelabs/stash/api/client
+github.com/epiphytelabs/stash/api/pkg/clean
+github.com/epiphytelabs/stash/api/pkg/coalesce
+# github.com/epiphytelabs/stash/apps/messages v0.0.0-00010101000000-000000000000 => ../../apps/messages
+## explicit; go 1.19
+github.com/epiphytelabs/stash/apps/messages/pkg/message
 # github.com/esimonov/ifshort v1.0.4
 ## explicit; go 1.17
 github.com/esimonov/ifshort/pkg/analyzer
@@ -255,6 +264,9 @@ github.com/google/uuid
 # github.com/gordonklaus/ineffassign v0.0.0-20210914165742-4cc7213b9bc8
 ## explicit; go 1.14
 github.com/gordonklaus/ineffassign/pkg/ineffassign
+# github.com/gorilla/css v1.0.0
+## explicit
+github.com/gorilla/css/scanner
 # github.com/gostaticanalysis/analysisutil v0.7.1
 ## explicit; go 1.16
 github.com/gostaticanalysis/analysisutil
@@ -397,6 +409,10 @@ github.com/mgechev/revive/formatter
 github.com/mgechev/revive/internal/typeparams
 github.com/mgechev/revive/lint
 github.com/mgechev/revive/rule
+# github.com/microcosm-cc/bluemonday v1.0.21
+## explicit; go 1.19
+github.com/microcosm-cc/bluemonday
+github.com/microcosm-cc/bluemonday/css
 # github.com/mitchellh/go-homedir v1.1.0
 ## explicit
 github.com/mitchellh/go-homedir
@@ -661,6 +677,10 @@ golang.org/x/mod/internal/lazyregexp
 golang.org/x/mod/modfile
 golang.org/x/mod/module
 golang.org/x/mod/semver
+# golang.org/x/net v0.1.0
+## explicit; go 1.17
+golang.org/x/net/html
+golang.org/x/net/html/atom
 # golang.org/x/sync v0.0.0-20220819030929-7fc1605a5dde
 ## explicit
 golang.org/x/sync/errgroup
@@ -841,3 +861,4 @@ nhooyr.io/websocket/internal/wsjs
 nhooyr.io/websocket/internal/xsync
 nhooyr.io/websocket/wsjson
 # github.com/epiphytelabs/stash/api => ../../api
+# github.com/epiphytelabs/stash/apps/messages => ../../apps/messages

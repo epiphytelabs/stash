@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"sort"
 
 	"github.com/hasura/go-graphql-client"
 	"github.com/pkg/errors"
@@ -46,6 +47,17 @@ func (ls Labels) Get(key string) []string {
 	}
 
 	return values
+}
+
+func (ls Labels) GetOne(key string) string {
+	vs := ls.Get(key)
+	sort.Strings(vs)
+
+	if len(vs) > 0 {
+		return vs[0]
+	}
+
+	return ""
 }
 
 func (ls Labels) Input() []LabelInput {

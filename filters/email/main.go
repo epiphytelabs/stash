@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	filter = "email/v0"
+	filter = "email/v1"
 )
 
 func main() {
@@ -63,8 +63,14 @@ func label(c *stash.Client, b stash.Blob) error {
 	}
 
 	ls := stash.Labels{
-		{Key: "filter", Values: []string{"email/v0"}},
+		{Key: "filter", Values: []string{filter}},
 		{Key: "thread", Values: []string{m.Thread()}},
+	}
+
+	if from := m.Header("From"); from != "" {
+		if b.Labels.GetOne("from") != from {
+			ls = append(ls, stash.Label{Key: "from", Values: []string{from}})
+		}
 	}
 
 	if err := c.LabelAdd(b.Hash, ls); err != nil {

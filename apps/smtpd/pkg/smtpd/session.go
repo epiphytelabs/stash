@@ -1,11 +1,13 @@
 package smtpd
 
 import (
+	"bytes"
 	"io"
 	"log"
 
 	"github.com/emersion/go-smtp"
 	stash "github.com/epiphytelabs/stash/api/client"
+	"github.com/epiphytelabs/stash/apps/messages/pkg/message"
 	"github.com/pkg/errors"
 )
 
@@ -33,9 +35,20 @@ func (s *Session) Data(r io.Reader) error {
 		return errors.WithStack(err)
 	}
 
+	m, err := message.New(bytes.NewReader(data))
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	from, err := m.From()
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
 	labels := stash.Labels{
 		{Key: "domain", Values: []string{"message", "email"}},
-		{Key: "from", Values: []string{s.from}},
+		{Key: "smtp/from", Values: []string{s.from}},
+		{Key: "from", Values: []string{from.String()}},
 		{Key: "to", Values: []string{s.to}},
 	}
 
