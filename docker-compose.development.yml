@@ -1,9 +1,4 @@
 services:
-  router:
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./router:/etc/traefik/dynamic
   api:
     build:
       target: development
@@ -30,3 +25,8 @@ services:
       target: development
     volumes:
       - ./filters/email:/src
+  router:
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./router:/etc/traefik/dynamic

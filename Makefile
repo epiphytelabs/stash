@@ -1,4 +1,4 @@
-.PHONY: all build lint mail vendor
+.PHONY: all build init lint mail vendor
 
 projects = api apps/messages apps/smtpd filters/email
 
@@ -6,6 +6,10 @@ all: build
 
 build:
 	$(call make-sub)
+
+init:
+	$(if $(wildcard .env),$(error .env already exists))
+	echo "POSTGRES_PASSWORD=$(shell pwgen -Bs1 32)" >> .env
 
 lint:
 	$(call make-sub,lint)

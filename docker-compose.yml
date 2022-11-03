@@ -1,47 +1,10 @@
 version: "3.9"
 services:
-  router:
-    build:
-      context: router
-    environment:
-      - AWS_ACCESS_KEY_ID
-      - AWS_SECRET_ACCESS_KEY
-      - AWS_HOSTED_ZONE_ID
-    command:
-      # - "--accesslog"
-      - "--api.insecure"
-      - "--certificatesresolvers.letsencrypt.acme.email=root@epiphyte.xyz"
-      - "--certificatesresolvers.letsencrypt.acme.storage=/db/acme/acme.json"
-      - "--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=route53"
-      - "--entrypoints.smtp.address=:25"
-      - "--entrypoints.http.address=:80"
-      - "--entrypoints.http.http.redirections.entrypoint.to=https"
-      - "--entrypoints.http.http.redirections.entrypoint.scheme=https"
-      - "--entrypoints.https.address=:443"
-      - "--entrypoints.https.http.tls=true"
-      - "--entrypoints.https.http.tls.certresolver=${CERT_RESOLVER:-}"
-      - "--entrypoints.https.http.tls.domains[0].main=${DOMAIN:-stash.localhost}"
-      - "--entrypoints.https.http.tls.domains[0].sans=*.${DOMAIN:-stash.localhost}"
-      - "--log.level=${LOG_LEVEL:-INFO}"
-      - "--providers.docker"
-      - "--providers.docker.exposedbydefault=false"
-      - "--providers.file.filename=/etc/traefik/dynamic/config.yml"
-      - "--providers.file.watch=true"
-      - "--serverstransport.insecureskipverify=true"
-    labels:
-      - "traefik.http.routers.router.entrypoints=https"
-    ports:
-      - "25:25"
-      - "80:80"
-      - "443:443"
-    restart: unless-stopped
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./db/acme:/db/acme
-      - ./db/certs/public:/db/certs/public
   api:
     build:
       context: api
+    environment:
+      - POSTGRES_URL=postgres://app:${POSTGRES_PASSWORD}@postgres:5432/app
     labels:
       - "traefik.enable=true"
       - "traefik.http.middlewares.pass-client-cert.passtlsclientcert.pem=false"
@@ -89,3 +52,54 @@ services:
     build:
       context: filters/email
     restart: unless-stopped
+  postgres:
+    environment:
+      - POSTGRES_DB=app
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?}
+      - POSTGRES_USER=app
+    image: postgres:15
+    restart: unless-stopped
+    volumes:
+      - postgres:/var/lib/postgresql/data
+  router:
+    build:
+      context: router
+    environment:
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_HOSTED_ZONE_ID
+    command:
+      # - "--accesslog"
+      - "--api.insecure"
+      - "--certificatesresolvers.letsencrypt.acme.email=root@epiphyte.xyz"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/db/acme/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=route53"
+      - "--entrypoints.smtp.address=:25"
+      - "--entrypoints.http.address=:80"
+      - "--entrypoints.http.http.redirections.entrypoint.to=https"
+      - "--entrypoints.http.http.redirections.entrypoint.scheme=https"
+      - "--entrypoints.https.address=:443"
+      - "--entrypoints.https.http.tls=true"
+      - "--entrypoints.https.http.tls.certresolver=${CERT_RESOLVER:-}"
+      - "--entrypoints.https.http.tls.domains[0].main=${DOMAIN:-stash.localhost}"
+      - "--entrypoints.https.http.tls.domains[0].sans=*.${DOMAIN:-stash.localhost}"
+      - "--log.level=${LOG_LEVEL:-INFO}"
+      - "--providers.docker"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.file.filename=/etc/traefik/dynamic/config.yml"
+      - "--providers.file.watch=true"
+      - "--serverstransport.insecureskipverify=true"
+    labels:
+      - "traefik.http.routers.router.entrypoints=https"
+    ports:
+      - "25:25"
+      - "80:80"
+      - "443:443"
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./db/acme:/db/acme
+      - ./db/certs/public:/db/certs/public
+volumes:
+  postgres:
+    driver: local
