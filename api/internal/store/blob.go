@@ -17,19 +17,9 @@ type Blob struct {
 	Created time.Time `json:"created"`
 }
 
-func (s *Store) subscribeAdd(ctx context.Context, query string, ch chan Blob) {
-	fmt.Printf("adding subscription: %v\n", query)
-	s.added.Store(ch, query)
-	<-ctx.Done()
-	fmt.Printf("removing subscription: %v\n", query)
-	s.added.Delete(ch)
-}
-
 func (s *Store) BlobAdded(ctx context.Context, query string) chan Blob {
 	ch := make(chan Blob)
-
 	go s.subscribeAdd(ctx, query, ch)
-
 	return ch
 }
 
@@ -179,6 +169,12 @@ func (s *Store) BlobList(query string) ([]Blob, error) {
 	}
 
 	return blobs, nil
+}
+
+func (s *Store) BlobRemoved(ctx context.Context, query string) chan string {
+	ch := make(chan string)
+	go s.subscribeRemove(ctx, query, ch)
+	return ch
 }
 
 func (s *Store) blobMatch(hash string, query string) (bool, error) {

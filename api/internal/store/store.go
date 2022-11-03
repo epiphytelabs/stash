@@ -1,7 +1,9 @@
 package store
 
 import (
+	"context"
 	"database/sql"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -17,7 +19,8 @@ type Store struct {
 	db *sql.DB
 	fs root.FS
 
-	added sync.Map
+	added   sync.Map
+	removed sync.Map
 }
 
 func New(base string) (*Store, error) {
@@ -44,6 +47,22 @@ func (s *Store) Close() error {
 	}
 
 	return nil
+}
+
+func (s *Store) subscribeAdd(ctx context.Context, query string, ch chan Blob) {
+	log.Printf("subscribing add: %v\n", query)
+	s.added.Store(ch, query)
+	<-ctx.Done()
+	log.Printf("unsubscribing add: %v\n", query)
+	s.added.Delete(ch)
+}
+
+func (s *Store) subscribeRemove(ctx context.Context, query string, ch chan string) {
+	log.Printf("subscribing remove: %v\n", query)
+	s.removed.Store(ch, query)
+	<-ctx.Done()
+	log.Printf("unsubscribing remove: %v\n", query)
+	s.removed.Delete(ch)
 }
 
 func hashFile(hash string) string {
@@ -83,7 +102,7 @@ func initializeDatabase(base string) (*sql.DB, error) {
 
 		CREATE INDEX IF NOT EXISTS labels_hash ON labels (hash);
 		CREATE INDEX IF NOT EXISTS labels_hash_key ON labels (hash, key);
-		CREATE INDEX IF NOT EXISTS labels_hash_key_value ON labels (hash, key, value);
+		CREATE UNIQUE INDEX IF NOT EXISTS labels_hash_key_value ON labels (hash, key, value);
 	`)
 	if err != nil {
 		return nil, errors.WithStack(err)

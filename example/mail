@@ -2,6 +2,7 @@ EHLO localhost
 MAIL FROM:<david@dollar.io>
 RCPT TO:<david@stash.dollar.io>
 DATA
+From: David Dollar <david@dollar.io>
 Delivered-To: david@stash.dollar.io
 Subject: Hello on %%DATE%%
 

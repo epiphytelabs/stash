@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	filter = "email/v1"
+	filter = "email/v2"
 )
 
 func main() {

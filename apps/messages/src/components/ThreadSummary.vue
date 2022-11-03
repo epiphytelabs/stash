@@ -17,7 +17,7 @@ const participants = computed(() => {
 });
 
 const subject = computed(() => {
-	return props.thread.messages[0].subject;
+	return props.thread.messages[0]?.subject;
 });
 
 onMounted(() => {

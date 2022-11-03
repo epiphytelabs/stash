@@ -99,14 +99,24 @@ func (g *Graph) BlobCreate(args BlobCreateArgs) (*Blob, error) {
 }
 
 type BlobRemovedArgs struct {
-	Labels *[]struct {
-		Key    string
-		Values []string
-	}
+	Query string
 }
 
-func (g *Graph) BlobRemoved(args BlobAddedArgs) chan graphql.ID {
+func (g *Graph) BlobRemoved(ctx context.Context, args BlobAddedArgs) chan graphql.ID {
 	ch := make(chan graphql.ID)
+
+	sch := g.store.BlobRemoved(ctx, args.Query)
+
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case id := <-sch:
+				ch <- graphql.ID(id)
+			}
+		}
+	}()
 
 	return ch
 }

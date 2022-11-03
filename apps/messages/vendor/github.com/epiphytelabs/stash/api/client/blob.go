@@ -88,3 +88,23 @@ func (c *Client) BlobList(query string) ([]Blob, error) {
 
 	return res.Blobs, nil
 }
+
+func (c *Client) BlobRemoved(ctx context.Context, query string) <-chan string {
+	type subscription struct {
+		BlobRemoved graphql.ID `graphql:"blobRemoved(query: $query)"`
+	}
+
+	// var res sub
+
+	vars := map[string]interface{}{
+		"query": query,
+	}
+
+	ch := make(chan string)
+
+	go subscribe(ctx, c.sub, vars, func(res subscription) {
+		ch <- string(res.BlobRemoved)
+	})
+
+	return ch
+}
