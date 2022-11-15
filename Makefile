@@ -1,4 +1,4 @@
-.PHONY: all build init lint mail vendor
+.PHONY: all build init lint mail psql vendor
 
 projects = api apps/messages apps/smtpd filters/email
 
@@ -16,6 +16,9 @@ lint:
 
 mail:
 	cat example/mail | sed -e "s|%%DATE%%|$(shell date '+%Y-%m-%d %H:%M:%S')|" | nc localhost 25
+
+psql:
+	docker-compose exec postgres psql -U app app
 
 vendor:
 	$(call make-sub,vendor)

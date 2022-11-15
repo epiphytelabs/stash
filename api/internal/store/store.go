@@ -2,21 +2,21 @@ package store
 
 import (
 	"context"
-	"database/sql"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"sync"
 
 	"github.com/ddollar/stdapi"
 	"github.com/epiphytelabs/stash/api/pkg/root"
-	_ "github.com/mattn/go-sqlite3"
+	"github.com/go-pg/pg/v10"
 	"github.com/pkg/errors"
 )
 
 type Store struct {
-	db *sql.DB
+	db *pg.DB
 	fs root.FS
 
 	added   sync.Map
@@ -71,19 +71,25 @@ func hashFile(hash string) string {
 
 func hashValidate(hash string) error {
 	if len(hash) != 64 {
+		debug.PrintStack()
+
 		return stdapi.Errorf(http.StatusBadRequest, "invalid hash")
 	}
 
 	return nil
 }
 
-func initializeDatabase(base string) (*sql.DB, error) {
-	db, err := sql.Open("sqlite3", filepath.Join(base, "index.db"))
+func initializeDatabase(base string) (*pg.DB, error) {
+	ctx := context.Background()
+
+	opts, err := pg.ParseURL(os.Getenv("POSTGRES_URL"))
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
-	if err := db.Ping(); err != nil {
+	db := pg.Connect(opts)
+
+	if err := db.Ping(ctx); err != nil {
 		return nil, errors.WithStack(err)
 	}
 
@@ -91,7 +97,7 @@ func initializeDatabase(base string) (*sql.DB, error) {
 		CREATE TABLE IF NOT EXISTS blobs (
 			hash VARCHAR(64) PRIMARY KEY,
 			size INTEGER NOT NULL,
-			created TIMESTAMP NOT NULL DEFAULT(STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW'))
+			created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 		);
 
 		CREATE TABLE IF NOT EXISTS labels (

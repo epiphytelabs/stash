@@ -8,9 +8,15 @@ import (
 	"github.com/pkg/errors"
 )
 
-type Labels = map[string][]string
+type Label struct {
+	Hash  string `pg:",pk"`
+	Key   string `pg:",pk"`
+	Value string
+}
 
-func (s *Store) LabelCreate(hash string, labels Labels) error {
+type Labels []Label
+
+func (s *Store) LabelCreate(hash, key, value string) error {
 	unmatched := map[chan Blob]bool{}
 
 	// TODO use a custom map so we can handle errors better
@@ -32,20 +38,22 @@ func (s *Store) LabelCreate(hash string, labels Labels) error {
 		return err
 	}
 
-	if err := s.BlobExists(hash); err != nil {
+	exists, err := s.BlobExists(hash)
+	if err != nil {
 		return err
 	}
+	if !exists {
+		return ErrHashNotFound
+	}
 
-	for key, values := range labels {
-		if err := labelValidate(key); err != nil {
-			return err
-		}
+	l := Label{
+		Hash:  hash,
+		Key:   key,
+		Value: value,
+	}
 
-		for _, value := range values {
-			if _, err := s.db.Exec("INSERT INTO labels (hash, key, value) VALUES (?, ?, ?)", hash, key, value); err != nil {
-				return errors.WithStack(err)
-			}
-		}
+	if _, err := s.db.Model(&l).Insert(); err != nil {
+		return err
 	}
 
 	b, err := s.BlobGet(hash)
@@ -74,8 +82,12 @@ func (s *Store) LabelDelete(hash string, labels Labels) error {
 		return err
 	}
 
-	if err := s.BlobExists(hash); err != nil {
+	exists, err := s.BlobExists(hash)
+	if err != nil {
 		return err
+	}
+	if !exists {
+		return ErrHashNotFound
 	}
 
 	tx, err := s.db.Begin()
@@ -84,15 +96,13 @@ func (s *Store) LabelDelete(hash string, labels Labels) error {
 	}
 	defer tx.Rollback() //nolint:errcheck
 
-	for key, values := range labels {
-		if err := labelValidate(key); err != nil {
+	for _, l := range labels {
+		if err := labelValidate(l.Key); err != nil {
 			return err
 		}
 
-		for _, value := range values {
-			if _, err := s.db.Exec("DELETE FROM labels WHERE hash = ? AND key = ? AND value = ?", hash, key, value); err != nil {
-				return errors.WithStack(err)
-			}
+		if _, err := s.db.Model(&l).WherePK().Delete(); err != nil {
+			return err
 		}
 	}
 
@@ -112,25 +122,18 @@ func (s *Store) LabelGet(hash, key string) ([]string, error) {
 		return nil, err
 	}
 
-	if err := s.BlobExists(hash); err != nil {
+	exists, err := s.BlobExists(hash)
+	if err != nil {
 		return nil, err
 	}
-
-	rows, err := s.db.Query("SELECT value FROM labels WHERE hash = ? AND key = ? ORDER BY value", hash, key)
-	if err != nil {
-		return nil, errors.WithStack(err)
+	if !exists {
+		return nil, ErrHashNotFound
 	}
 
 	values := []string{}
 
-	for rows.Next() {
-		var value string
-
-		if err := rows.Scan(&value); err != nil {
-			return nil, errors.WithStack(err)
-		}
-
-		values = append(values, value)
+	if _, err := s.db.Query(&values, "SELECT value FROM labels WHERE hash = ? AND key = ? ORDER BY value", hash, key); err != nil {
+		return nil, errors.WithStack(err)
 	}
 
 	return values, nil
@@ -141,28 +144,21 @@ func (s *Store) LabelList(hash string) (Labels, error) {
 		return nil, err
 	}
 
-	if err := s.BlobExists(hash); err != nil {
+	exists, err := s.BlobExists(hash)
+	if err != nil {
 		return nil, err
 	}
+	if !exists {
+		return nil, ErrHashNotFound
+	}
 
-	rows, err := s.db.Query("SELECT key, value FROM labels WHERE hash = ?", hash)
-	if err != nil {
+	var ls Labels
+
+	if _, err := s.db.Query(&ls, "SELECT * FROM labels WHERE hash = ?", hash); err != nil {
 		return nil, errors.WithStack(err)
 	}
 
-	labels := Labels{}
-
-	for rows.Next() {
-		var key, value string
-
-		if err := rows.Scan(&key, &value); err != nil {
-			return nil, errors.WithStack(err)
-		}
-
-		labels[key] = append(labels[key], value)
-	}
-
-	return labels, nil
+	return ls, nil
 }
 
 func labelValidate(key string) error {

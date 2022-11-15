@@ -14,6 +14,7 @@ import (
 
 type Blob struct {
 	Hash    string    `json:"hash"`
+	Size    int       `json:"size"`
 	Created time.Time `json:"created"`
 }
 
@@ -32,7 +33,11 @@ func (s *Store) BlobCreate(r io.Reader) (*Blob, error) {
 	hash := fmt.Sprintf("%x", sha256.Sum256(data))
 	file := hashFile(hash)
 
-	if err := s.BlobExists(hash); err == nil {
+	exists, err := s.BlobExists(hash)
+	if err != nil {
+		return nil, err
+	}
+	if exists {
 		return nil, errors.Errorf("hash exists: %s", hash)
 	}
 
@@ -62,8 +67,12 @@ func (s *Store) BlobDelete(hash string) error {
 		return err
 	}
 
-	if err := s.BlobExists(hash); err != nil {
+	exists, err := s.BlobExists(hash)
+	if err != nil {
 		return err
+	}
+	if !exists {
+		return ErrHashNotFound
 	}
 
 	if _, err := s.db.Exec("DELETE FROM blobs WHERE hash = ?", hash); err != nil {
@@ -72,7 +81,7 @@ func (s *Store) BlobDelete(hash string) error {
 
 	file := hashFile(hash)
 
-	exists, err := s.fs.Exists(file)
+	exists, err = s.fs.Exists(file)
 	if err != nil {
 		return err
 	} else if !exists {
@@ -103,42 +112,30 @@ func (s *Store) BlobData(hash string) (io.ReadCloser, error) {
 	return f, nil
 }
 
-func (s *Store) BlobExists(hash string) error {
+func (s *Store) BlobExists(hash string) (bool, error) {
 	if err := hashValidate(hash); err != nil {
-		return err
+		return false, err
 	}
 
-	rows, err := s.db.Query("SELECT hash FROM blobs WHERE hash = ?", hash)
-	if err != nil {
-		return errors.WithStack(err)
-	}
-	defer rows.Close()
+	var b Blob
 
-	if !rows.Next() {
-		return ErrHashNotFound
+	if _, err := s.db.Query(&b, "SELECT * FROM blobs WHERE hash = ?", hash); err != nil {
+		return false, errors.WithStack(err)
 	}
 
-	return nil
+	return b.Hash != "", nil
 }
 
 func (s *Store) BlobGet(hash string) (*Blob, error) {
-	rows, err := s.db.Query("SELECT created FROM blobs WHERE hash = ?", hash)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	defer rows.Close()
+	var b Blob
 
-	if !rows.Next() {
-		return nil, ErrHashNotFound
-	}
-
-	blob := Blob{Hash: hash}
-
-	if err := rows.Scan(&blob.Created); err != nil {
+	if _, err := s.db.Query(&b, "SELECT * FROM blobs WHERE hash = ?", hash); err != nil {
 		return nil, errors.WithStack(err)
 	}
 
-	return &blob, nil
+	fmt.Printf("b: %+v\n", b)
+
+	return &b, nil
 }
 
 func (s *Store) BlobList(query string) ([]Blob, error) {
@@ -152,23 +149,15 @@ func (s *Store) BlobList(query string) ([]Blob, error) {
 	q += qf
 	q += " ORDER BY blobs.created DESC"
 
-	rows, err := s.db.Query(q, args...)
-	if err != nil {
+	bs := []Blob{}
+
+	if _, err := s.db.Query(&bs, q, args...); err != nil {
 		return nil, errors.WithStack(err)
 	}
 
-	blobs := []Blob{}
+	fmt.Printf("bs: %+v\n", bs)
 
-	for rows.Next() {
-		var blob Blob
-		if err := rows.Scan(&blob.Hash, &blob.Created); err != nil {
-			return nil, errors.WithStack(err)
-		}
-
-		blobs = append(blobs, blob)
-	}
-
-	return blobs, nil
+	return bs, nil
 }
 
 func (s *Store) BlobRemoved(ctx context.Context, query string) chan string {
@@ -188,19 +177,9 @@ func (s *Store) blobMatch(hash string, query string) (bool, error) {
 	q += " AND blobs.hash = ?"
 	args = append(args, hash)
 
-	rows, err := s.db.Query(q, args...)
-	if err != nil {
-		return false, errors.WithStack(err)
-	}
-	defer rows.Close()
-
-	if !rows.Next() {
-		return false, errors.New("no rows in result set")
-	}
-
 	var count int
 
-	if err := rows.Scan(&count); err != nil {
+	if _, err := s.db.Query(&count, q, args...); err != nil {
 		return false, errors.WithStack(err)
 	}
 

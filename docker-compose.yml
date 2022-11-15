@@ -4,7 +4,7 @@ services:
     build:
       context: api
     environment:
-      - POSTGRES_URL=postgres://app:${POSTGRES_PASSWORD}@postgres:5432/app
+      - POSTGRES_URL=postgres://app:${POSTGRES_PASSWORD}@postgres:5432/app?sslmode=disable
     labels:
       - "traefik.enable=true"
       - "traefik.http.middlewares.pass-client-cert.passtlsclientcert.pem=false"

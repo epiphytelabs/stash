@@ -1,7 +1,6 @@
 package graph
 
 import (
-	"github.com/epiphytelabs/stash/api/internal/store"
 	"github.com/graph-gophers/graphql-go"
 )
 
@@ -27,14 +26,12 @@ type LabelAddArgs struct {
 }
 
 func (g *Graph) LabelAdd(args LabelAddArgs) (graphql.ID, error) {
-	labels := store.Labels{}
-
 	for _, l := range args.Labels {
-		labels[l.Key] = append(labels[l.Key], l.Values...)
-	}
-
-	if err := g.store.LabelCreate(string(args.Hash), labels); err != nil {
-		return "", err
+		for _, v := range l.Values {
+			if err := g.store.LabelCreate(string(args.Hash), l.Key, v); err != nil {
+				return "", err
+			}
+		}
 	}
 
 	return args.Hash, nil

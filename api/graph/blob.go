@@ -83,16 +83,14 @@ func (g *Graph) BlobCreate(args BlobCreateArgs) (*Blob, error) {
 		return nil, err
 	}
 
-	labels := store.Labels{}
-
 	if args.Labels != nil {
 		for _, l := range *args.Labels {
-			labels[l.Key] = append(labels[l.Key], l.Values...)
+			for _, v := range l.Values {
+				if err := g.store.LabelCreate(b.Hash, l.Key, v); err != nil {
+					return nil, err
+				}
+			}
 		}
-	}
-
-	if err := g.store.LabelCreate(b.Hash, labels); err != nil {
-		return nil, err
 	}
 
 	return &Blob{*b, g}, nil
@@ -150,9 +148,19 @@ func (b *Blob) Labels() ([]*Label, error) {
 		return nil, err
 	}
 
+	lsh := map[string][]string{}
+
+	for _, l := range ls {
+		if _, ok := lsh[l.Key]; !ok {
+			lsh[l.Key] = []string{}
+		}
+
+		lsh[l.Key] = append(lsh[l.Key], l.Value)
+	}
+
 	rls := []*Label{}
 
-	for k, vs := range ls {
+	for k, vs := range lsh {
 		rls = append(rls, &Label{
 			key:    k,
 			values: vs,
