@@ -133,8 +133,6 @@ func (s *Store) BlobGet(hash string) (*Blob, error) {
 		return nil, errors.WithStack(err)
 	}
 
-	fmt.Printf("b: %+v\n", b)
-
 	return &b, nil
 }
 
@@ -154,8 +152,6 @@ func (s *Store) BlobList(query string) ([]Blob, error) {
 	if _, err := s.db.Query(&bs, q, args...); err != nil {
 		return nil, errors.WithStack(err)
 	}
-
-	fmt.Printf("bs: %+v\n", bs)
 
 	return bs, nil
 }

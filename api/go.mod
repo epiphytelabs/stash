@@ -6,6 +6,7 @@ require (
 	github.com/Khan/genqlient v0.5.0
 	github.com/alecthomas/participle/v2 v2.0.0-beta.5
 	github.com/cespare/reflex v0.3.1
+	github.com/ddollar/migrate v1.1.2
 	github.com/ddollar/stdapi v1.0.3
 	github.com/go-pg/pg/v10 v10.10.7
 	github.com/golangci/golangci-lint v1.50.1
@@ -13,7 +14,6 @@ require (
 	github.com/graph-gophers/graphql-go v1.4.0
 	github.com/graph-gophers/graphql-transport-ws v0.0.2
 	github.com/hasura/go-graphql-client v0.8.1
-	github.com/mattn/go-sqlite3 v1.14.15
 	github.com/microcosm-cc/bluemonday v1.0.21
 	github.com/pkg/errors v0.9.1
 	github.com/vektra/mockery/v2 v2.14.0

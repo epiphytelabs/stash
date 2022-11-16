@@ -28,10 +28,12 @@ func New(base string) (*Store, error) {
 		return nil, errors.WithStack(err)
 	}
 
-	db, err := initializeDatabase(base)
+	opts, err := pg.ParseURL(os.Getenv("POSTGRES_URL"))
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
+
+	db := pg.Connect(opts)
 
 	s := &Store{
 		db: db,
@@ -72,47 +74,8 @@ func hashFile(hash string) string {
 func hashValidate(hash string) error {
 	if len(hash) != 64 {
 		debug.PrintStack()
-
 		return stdapi.Errorf(http.StatusBadRequest, "invalid hash")
 	}
 
 	return nil
-}
-
-func initializeDatabase(base string) (*pg.DB, error) {
-	ctx := context.Background()
-
-	opts, err := pg.ParseURL(os.Getenv("POSTGRES_URL"))
-	if err != nil {
-		return nil, err
-	}
-
-	db := pg.Connect(opts)
-
-	if err := db.Ping(ctx); err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	_, err = db.Exec(`
-		CREATE TABLE IF NOT EXISTS blobs (
-			hash VARCHAR(64) PRIMARY KEY,
-			size INTEGER NOT NULL,
-			created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-		);
-
-		CREATE TABLE IF NOT EXISTS labels (
-			hash VARCHAR(64) NOT NULL,
-			key VARCHAR NOT NULL,
-			value VARCHAR NOT NULL
-		);
-
-		CREATE INDEX IF NOT EXISTS labels_hash ON labels (hash);
-		CREATE INDEX IF NOT EXISTS labels_hash_key ON labels (hash, key);
-		CREATE UNIQUE INDEX IF NOT EXISTS labels_hash_key_value ON labels (hash, key, value);
-	`)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	return db, nil
 }

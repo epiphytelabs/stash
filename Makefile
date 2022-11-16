@@ -1,4 +1,4 @@
-.PHONY: all build init lint mail psql vendor
+.PHONY: all build init lint mail migrate migration psql vendor
 
 projects = api apps/messages apps/smtpd filters/email
 
@@ -16,6 +16,13 @@ lint:
 
 mail:
 	cat example/mail | sed -e "s|%%DATE%%|$(shell date '+%Y-%m-%d %H:%M:%S')|" | nc localhost 25
+
+migrate:
+	docker-compose exec api go run ./migrate
+
+migration:
+	$(if $(name),,$(error name is not set))
+	touch migrate/migrations/$(shell date +%Y%m%d%H%M%S)_$(name).sql
 
 psql:
 	docker-compose exec postgres psql -U app app

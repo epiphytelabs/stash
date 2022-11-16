@@ -53,7 +53,7 @@ func (s *Store) LabelCreate(hash, key, value string) error {
 	}
 
 	if _, err := s.db.Model(&l).Insert(); err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 
 	b, err := s.BlobGet(hash)
@@ -102,7 +102,7 @@ func (s *Store) LabelDelete(hash string, labels Labels) error {
 		}
 
 		if _, err := s.db.Model(&l).WherePK().Delete(); err != nil {
-			return err
+			return errors.WithStack(err)
 		}
 	}
 
