@@ -46,8 +46,21 @@ func NewClient(host string) (*Client, error) {
 		// sub:     graphql.NewSubscriptionClient(fmt.Sprintf("wss://%s/graph", host)).WithWebSocketOptions(wsopts).WithRetryTimeout(1 * time.Second).WithLog(log.Println),
 	}
 
+	c.sub.OnDisconnected(func() {
+		fmt.Println("disconnected")
+		// c.sub.Reset()
+	})
+	// c.sub.OnDisconnected(func() {
+	// 	fmt.Println("reconnecting")
+	// 	c.sub.Reset()
+	// })
+
 	c.sub.OnError(func(sc *graphql.SubscriptionClient, err error) error {
-		sc.Close()        //nolint:errcheck
+		fmt.Println("onerror")
+		fmt.Printf("err: %+v\n", err)
+		if err != nil {
+			sc.Close()
+		}
 		return sc.Reset() //nolint:wrapcheck
 	})
 
@@ -55,6 +68,8 @@ func NewClient(host string) (*Client, error) {
 }
 
 func subscribe[T any](ctx context.Context, c *graphql.SubscriptionClient, vars map[string]any, fn func(T)) {
+	fmt.Println("starting")
+
 	var query T
 
 	id, err := c.Subscribe(&query, vars, func(data []byte, err error) error {
@@ -70,9 +85,11 @@ func subscribe[T any](ctx context.Context, c *graphql.SubscriptionClient, vars m
 		log.Printf("error: %v\n", err)
 	}
 
-	go c.Run() //nolint:errcheck
+	go c.Run()
 
 	<-ctx.Done()
+
+	fmt.Println("done")
 
 	if err := c.Unsubscribe(id); err != nil {
 		log.Printf("error: %v\n", err)

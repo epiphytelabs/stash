@@ -124,3 +124,30 @@ func errorTracer(err error) map[string]interface{} {
 
 	return nil
 }
+
+func transaction(ctx context.Context, g *Graph, fn func(*Graph) error) error {
+	return errors.WithStack(store.Transaction(ctx, g.store, func(s *store.Store) error {
+		e := fn(&Graph{handler: g.handler, store: s})
+		return e
+	}))
+}
+
+func transactionReturn[R any](ctx context.Context, g *Graph, fn func(*Graph) (R, error)) (R, error) {
+	var ret R
+
+	err := transaction(ctx, g, func(g *Graph) error {
+		res, err := fn(g)
+		if err != nil {
+			return err
+		}
+
+		ret = res
+
+		return nil
+	})
+	if err != nil {
+		return ret, err
+	}
+
+	return ret, nil
+}

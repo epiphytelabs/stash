@@ -77,7 +77,7 @@ func (s *Store) LabelCreate(hash, key, value string) error {
 	return nil
 }
 
-func (s *Store) LabelDelete(hash string, labels Labels) error {
+func (s *Store) LabelDelete(hash, key string) error {
 	if err := hashValidate(hash); err != nil {
 		return err
 	}
@@ -96,14 +96,12 @@ func (s *Store) LabelDelete(hash string, labels Labels) error {
 	}
 	defer tx.Rollback() //nolint:errcheck
 
-	for _, l := range labels {
-		if err := labelValidate(l.Key); err != nil {
-			return err
-		}
+	if err := labelValidate(key); err != nil {
+		return err
+	}
 
-		if _, err := s.db.Model(&l).WherePK().Delete(); err != nil {
-			return errors.WithStack(err)
-		}
+	if _, err := s.db.Model(&Label{Hash: hash, Key: key}).WherePK().Delete(); err != nil {
+		return errors.WithStack(err)
 	}
 
 	if err := tx.Commit(); err != nil {

@@ -25,6 +25,9 @@ services:
       target: development
     volumes:
       - ./filters/email:/src
+  postgres:
+    ports:
+      - "5432:5432"
   router:
     ports:
       - "8080:8080"

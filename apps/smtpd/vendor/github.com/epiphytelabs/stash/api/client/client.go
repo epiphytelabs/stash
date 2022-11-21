@@ -46,6 +46,11 @@ func NewClient(host string) (*Client, error) {
 		// sub:     graphql.NewSubscriptionClient(fmt.Sprintf("wss://%s/graph", host)).WithWebSocketOptions(wsopts).WithRetryTimeout(1 * time.Second).WithLog(log.Println),
 	}
 
+	c.sub.OnDisconnected(func() {
+		fmt.Println("reconnecting")
+		c.sub.Reset()
+	})
+
 	c.sub.OnError(func(sc *graphql.SubscriptionClient, err error) error {
 		sc.Close()        //nolint:errcheck
 		return sc.Reset() //nolint:wrapcheck
@@ -70,10 +75,31 @@ func subscribe[T any](ctx context.Context, c *graphql.SubscriptionClient, vars m
 		log.Printf("error: %v\n", err)
 	}
 
-	go c.Run() //nolint:errcheck
+	go func() {
+		for {
+			fmt.Println("running")
+			c.Run()
+			// if err := c.Run(); err != nil {
+			// 	log.Printf("error: %v\n", err)
+			// }
+			// c.Reset()
+		}
+		// for {
+		// 	select {
+		// 	case <-ctx.Done():
+		// 		return
+		// 	default:
+		// 		fmt.Println("running")
+		// 		if err := c.Run(); err != nil {
+		// 			log.Printf("error: %v\n", err)
+		// 		}
+		// 	}
+		// }
+	}()
 
 	<-ctx.Done()
 
+	fmt.Println("done")
 	if err := c.Unsubscribe(id); err != nil {
 		log.Printf("error: %v\n", err)
 	}

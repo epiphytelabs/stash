@@ -25,74 +25,78 @@ func (s *Store) BlobAdded(ctx context.Context, query string) chan Blob {
 }
 
 func (s *Store) BlobCreate(r io.Reader) (*Blob, error) {
-	data, err := io.ReadAll(r)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
+	return TransactionReturn(context.Background(), s, func(s *Store) (*Blob, error) {
+		data, err := io.ReadAll(r)
+		if err != nil {
+			return nil, errors.WithStack(err)
+		}
 
-	hash := fmt.Sprintf("%x", sha256.Sum256(data))
-	file := hashFile(hash)
+		hash := fmt.Sprintf("%x", sha256.Sum256(data))
+		file := hashFile(hash)
 
-	exists, err := s.BlobExists(hash)
-	if err != nil {
-		return nil, err
-	}
-	if exists {
-		return nil, errors.Errorf("hash exists: %s", hash)
-	}
+		exists, err := s.BlobExists(hash)
+		if err != nil {
+			return nil, err
+		}
+		if exists {
+			return nil, errors.Errorf("hash exists: %s", hash)
+		}
 
-	if _, err := s.fs.Stat(file); !os.IsNotExist(err) {
-		return nil, errors.Errorf("hash exists: %s", hash)
-	}
+		if _, err := s.fs.Stat(file); !os.IsNotExist(err) {
+			return nil, errors.Errorf("hash exists: %s", hash)
+		}
 
-	if _, err := s.db.Exec("INSERT INTO blobs (hash, size) VALUES (?, ?)", hash, len(data)); err != nil {
-		return nil, errors.WithStack(err)
-	}
+		if _, err := s.db.Exec("INSERT INTO blobs (hash, size) VALUES (?, ?)", hash, len(data)); err != nil {
+			return nil, errors.WithStack(err)
+		}
 
-	f, err := s.fs.Create(file)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
+		f, err := s.fs.Create(file)
+		if err != nil {
+			return nil, err
+		}
+		defer f.Close()
 
-	if _, err := f.Write(data); err != nil {
-		return nil, errors.WithStack(err)
-	}
+		if _, err := f.Write(data); err != nil {
+			return nil, errors.WithStack(err)
+		}
 
-	return s.BlobGet(hash)
+		return s.BlobGet(hash)
+	})
 }
 
 func (s *Store) BlobDelete(hash string) error {
-	if err := hashValidate(hash); err != nil {
-		return err
-	}
+	return Transaction(context.Background(), s, func(s *Store) error {
+		if err := hashValidate(hash); err != nil {
+			return err
+		}
 
-	exists, err := s.BlobExists(hash)
-	if err != nil {
-		return err
-	}
-	if !exists {
-		return ErrHashNotFound
-	}
+		exists, err := s.BlobExists(hash)
+		if err != nil {
+			return err
+		}
+		if !exists {
+			return ErrHashNotFound
+		}
 
-	if _, err := s.db.Exec("DELETE FROM blobs WHERE hash = ?", hash); err != nil {
-		return errors.WithStack(err)
-	}
+		if _, err := s.db.Exec("DELETE FROM blobs WHERE hash = ?", hash); err != nil {
+			return errors.WithStack(err)
+		}
 
-	file := hashFile(hash)
+		file := hashFile(hash)
 
-	exists, err = s.fs.Exists(file)
-	if err != nil {
-		return err
-	} else if !exists {
-		return ErrHashNotFound
-	}
+		exists, err = s.fs.Exists(file)
+		if err != nil {
+			return err
+		} else if !exists {
+			return ErrHashNotFound
+		}
 
-	if err := s.fs.Remove(file); err != nil {
-		return err
-	}
+		if err := s.fs.Remove(file); err != nil {
+			return err
+		}
 
-	return nil
+		return nil
+	})
 }
 
 func (s *Store) BlobData(hash string) (io.ReadCloser, error) {

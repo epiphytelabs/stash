@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -16,7 +17,7 @@ import (
 )
 
 type Store struct {
-	db *pg.DB
+	db pg.DBI
 	fs root.FS
 
 	added   sync.Map
@@ -44,19 +45,38 @@ func New(base string) (*Store, error) {
 }
 
 func (s *Store) Close() error {
-	if err := s.db.Close(); err != nil {
-		return errors.WithStack(err)
+	if db, ok := s.db.(*pg.DB); ok {
+		if err := db.Close(); err != nil {
+			return errors.WithStack(err)
+		}
 	}
 
 	return nil
 }
 
 func (s *Store) subscribeAdd(ctx context.Context, query string, ch chan Blob) {
-	log.Printf("subscribing add: %v\n", query)
-	s.added.Store(ch, query)
-	<-ctx.Done()
-	log.Printf("unsubscribing add: %v\n", query)
-	s.added.Delete(ch)
+	fmt.Println("subscribing")
+
+	db, ok := s.db.(*pg.DB)
+	if !ok {
+		log.Println("error: listen unsupported on transaction")
+		return
+	}
+
+	ln := db.Listen(ctx, "label_insert")
+	defer ln.Close()
+
+	lch := ln.Channel()
+
+	for {
+		select {
+		case <-ctx.Done():
+			fmt.Println("done")
+			return
+		case msg := <-lch:
+			fmt.Printf("msg.Payload: %+v\n", msg.Payload)
+		}
+	}
 }
 
 func (s *Store) subscribeRemove(ctx context.Context, query string, ch chan string) {
