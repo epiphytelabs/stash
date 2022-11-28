@@ -47,12 +47,20 @@ func NewClient(host string) (*Client, error) {
 	}
 
 	c.sub.OnDisconnected(func() {
-		fmt.Println("reconnecting")
-		c.sub.Reset()
+		fmt.Println("disconnected")
+		// c.sub.Reset()
 	})
+	// c.sub.OnDisconnected(func() {
+	// 	fmt.Println("reconnecting")
+	// 	c.sub.Reset()
+	// })
 
 	c.sub.OnError(func(sc *graphql.SubscriptionClient, err error) error {
-		sc.Close()        //nolint:errcheck
+		fmt.Println("onerror")
+		fmt.Printf("err: %+v\n", err)
+		if err != nil {
+			sc.Close()
+		}
 		return sc.Reset() //nolint:wrapcheck
 	})
 
@@ -60,6 +68,8 @@ func NewClient(host string) (*Client, error) {
 }
 
 func subscribe[T any](ctx context.Context, c *graphql.SubscriptionClient, vars map[string]any, fn func(T)) {
+	fmt.Println("starting")
+
 	var query T
 
 	id, err := c.Subscribe(&query, vars, func(data []byte, err error) error {
@@ -75,31 +85,12 @@ func subscribe[T any](ctx context.Context, c *graphql.SubscriptionClient, vars m
 		log.Printf("error: %v\n", err)
 	}
 
-	go func() {
-		for {
-			fmt.Println("running")
-			c.Run()
-			// if err := c.Run(); err != nil {
-			// 	log.Printf("error: %v\n", err)
-			// }
-			// c.Reset()
-		}
-		// for {
-		// 	select {
-		// 	case <-ctx.Done():
-		// 		return
-		// 	default:
-		// 		fmt.Println("running")
-		// 		if err := c.Run(); err != nil {
-		// 			log.Printf("error: %v\n", err)
-		// 		}
-		// 	}
-		// }
-	}()
+	go c.Run()
 
 	<-ctx.Done()
 
 	fmt.Println("done")
+
 	if err := c.Unsubscribe(id); err != nil {
 		log.Printf("error: %v\n", err)
 	}
