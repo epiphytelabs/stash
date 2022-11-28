@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	stash "github.com/epiphytelabs/stash/api/client"
 	"github.com/epiphytelabs/stash/apps/messages/pkg/message"
@@ -27,26 +28,30 @@ func run() error {
 		return err
 	}
 
-	bs, err := c.BlobList(unprocessedQuery())
-	if err != nil {
-		return err
-	}
+	added := c.BlobAdded(context.Background(), unprocessedQuery())
 
-	for _, b := range bs {
-		if err := label(c, b); err != nil {
-			log.Printf("error: %v\n", err)
+	tick := time.NewTicker(5 * time.Second)
+	defer tick.Stop()
+
+	for {
+		select {
+		case b := <-added:
+			if err := label(c, b); err != nil {
+				log.Printf("error: %v\n", err)
+			}
+		case <-tick.C:
+			bs, err := c.BlobList(unprocessedQuery())
+			if err != nil {
+				log.Printf("error: %v\n", err)
+			}
+
+			for _, b := range bs {
+				if err := label(c, b); err != nil {
+					log.Printf("error: %v\n", err)
+				}
+			}
 		}
 	}
-
-	ch := c.BlobAdded(context.Background(), unprocessedQuery())
-
-	for b := range ch {
-		if err := label(c, b); err != nil {
-			log.Printf("error: %v\n", err)
-		}
-	}
-
-	return nil
 }
 
 func label(c *stash.Client, b stash.Blob) error {
