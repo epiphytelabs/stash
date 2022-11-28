@@ -15,7 +15,6 @@ COPY . .
 
 EXPOSE 4000
 
-# CMD ["bash", "-c", "npm rebuild && npx vite --host"]
 CMD [ "go", "run", "./vendor/github.com/cespare/reflex", "-c", ".reflex" ]
 
 ## package ####################################################################

@@ -8,6 +8,9 @@ import pluginRewriteAll from "vite-plugin-rewrite-all";
 
 export default defineConfig({
 	base: "/apps/messages/",
+	build: {
+		outDir: "./dist/web",
+	},
 	plugins: [vue(), viteGraphQLPlugin(), pluginRewriteAll()],
 	resolve: {
 		alias: {

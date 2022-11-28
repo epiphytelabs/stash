@@ -114,11 +114,11 @@ func viteDevelopment() (http.Handler, error) {
 	return h, nil
 }
 
-//go:embed dist/*
+//go:embed dist/web/*
 var dist embed.FS
 
 func viteProduction() (http.Handler, error) {
-	root, err := fs.Sub(dist, "dist")
+	root, err := fs.Sub(dist, "dist/web")
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
