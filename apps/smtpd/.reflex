@@ -1,1 +1,0 @@
--s -r '\.(go)$' -R '^vendor/' -- sh -c "make -B dist/smtpd && exec dist/smtpd"

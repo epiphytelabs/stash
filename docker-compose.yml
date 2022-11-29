@@ -22,13 +22,9 @@ services:
       context: apps/messages
     labels:
       - "traefik.enable=true"
-      - "traefik.http.middlewares.pass-client-cert.passtlsclientcert.pem=false"
-      - "traefik.http.middlewares.pass-client-cert.passtlsclientcert.info.subject.commonname=true"
       - "traefik.http.routers.messages.entrypoints=https"
-      - "traefik.http.routers.messages.middlewares=pass-client-cert"
       - "traefik.http.routers.messages.rule=Host(`${DOMAIN:-stash.localhost}`) && PathPrefix(`/apps/messages/`)"
       - "traefik.http.routers.messages.tls=true"
-      - "traefik.http.services.messages.loadbalancer.server.scheme=https"
   apps-register:
     build:
       args:
@@ -40,17 +36,20 @@ services:
       - "traefik.http.routers.register.rule=Host(`register.${DOMAIN:-stash.localhost}`)"
       - "traefik.http.routers.register.tls=true"
       - "traefik.http.routers.register.tls.options=register@file"
-  apps-smtpd:
+  domains-mail:
     build:
-      context: apps/smtpd
+      context: domains/mail
     labels:
       - "traefik.enable=true"
-      - "traefik.tcp.routers.smtpd.entrypoints=smtp"
-      - "traefik.tcp.routers.smtpd.rule=HostSNI(`*`)"
-    restart: unless-stopped
-  filters-email:
-    build:
-      context: filters/email
+      - "traefik.http.routers.mail.entrypoints=https"
+      - "traefik.http.routers.mail.middlewares=pass-client-cert"
+      - "traefik.http.routers.mail.rule=Host(`${DOMAIN:-stash.localhost}`) && PathPrefix(`/domains/mail/`)"
+      - "traefik.http.routers.mail.tls=true"
+      - "traefik.http.services.mail.loadbalancer.server.port=4000"
+      - "traefik.http.services.mail.loadbalancer.server.scheme=https"
+      - "traefik.tcp.routers.mail.entrypoints=smtp"
+      - "traefik.tcp.routers.mail.rule=HostSNI(`*`)"
+      - "traefik.tcp.services.mail.loadbalancer.server.port=2525"
     restart: unless-stopped
   postgres:
     environment:

@@ -2,12 +2,11 @@
 
 FROM ddollar/go:1.19 AS development
 
-ENV MODE=development
-
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 WORKDIR /src
 
+EXPOSE 2525
 EXPOSE 4000
 
 CMD [ "go", "run", "./vendor/github.com/cespare/reflex", "-c", ".reflex" ]
@@ -22,7 +21,7 @@ WORKDIR /src
 
 COPY . .
 
-RUN make binaries compress
+RUN make build compress
 
 ## production ##################################################################
 
@@ -35,9 +34,9 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 WORKDIR /
 
-COPY --from=package /src/dist/api /opt/bin/
-COPY --from=package /src/dist/migrate /opt/bin/
+COPY --from=package /src/dist/app /opt/bin/
 
+EXPOSE 2525
 EXPOSE 4000
 
-CMD [ "/opt/bin/api" ]
+CMD [ "/opt/bin/app" ]

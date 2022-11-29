@@ -15,16 +15,11 @@ services:
       target: development
     volumes:
       - ./apps/register:/src
-  apps-smtpd:
+  domains-mail:
     build:
       target: development
     volumes:
-      - ./apps/smtpd:/src
-  filters-email:
-    build:
-      target: development
-    volumes:
-      - ./filters/email:/src
+      - ./domains/mail:/src
   postgres:
     ports:
       - "5432:5432"

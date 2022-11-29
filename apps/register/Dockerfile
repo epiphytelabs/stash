@@ -33,7 +33,7 @@ COPY --from=development /src /src
 
 ENV VITE_DOMAIN=${DOMAIN}
 
-RUN npx vite build
+RUN make build
 
 ## production ##################################################################
 

@@ -1,6 +1,6 @@
 .PHONY: all binaries ca compress deploy lint mail test vendor
 
-commands = api
+commands = api migrate
 
 binaries = $(addprefix dist/, $(commands))
 

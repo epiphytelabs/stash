@@ -2,6 +2,6 @@
 	"files.exclude": {
 		"api": true,
 		"apps": true,
-		"filters": true
+		"domains": true
 	}
 }

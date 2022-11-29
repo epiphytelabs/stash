@@ -20,7 +20,7 @@ const apolloCache = new InMemoryCache();
 
 import { WebSocketLink } from "@apollo/client/link/ws";
 const wsLink = new WebSocketLink({
-	uri: `wss://${window.location.hostname}/apps/messages/graph`,
+	uri: `wss://${window.location.hostname}/domains/mail/graph`,
 	options: {
 		reconnect: true,
 		connectionParams: {

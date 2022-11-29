@@ -52,7 +52,7 @@ func (s *Store) LabelCreate(hash, key, value string) error {
 		Value: value,
 	}
 
-	if _, err := s.db.Model(&l).Insert(); err != nil {
+	if _, err := s.db.Model(&l).OnConflict("(hash, key, value) DO NOTHING").Insert(); err != nil {
 		return errors.WithStack(err)
 	}
 
