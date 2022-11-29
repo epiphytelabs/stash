@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"runtime/debug"
 	"sync"
 
 	"github.com/ddollar/stdapi"
@@ -55,8 +54,6 @@ func (s *Store) Close() error {
 }
 
 func (s *Store) subscribeAdd(ctx context.Context, query string, ch chan Blob) {
-	fmt.Println("subscribing")
-
 	db, ok := s.db.(*pg.DB)
 	if !ok {
 		log.Println("error: listen unsupported on transaction")
@@ -93,7 +90,6 @@ func hashFile(hash string) string {
 
 func hashValidate(hash string) error {
 	if len(hash) != 64 {
-		debug.PrintStack()
 		return stdapi.Errorf(http.StatusBadRequest, "invalid hash")
 	}
 

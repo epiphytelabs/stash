@@ -80,7 +80,7 @@ func subscribe[T any](ctx context.Context, c *graphql.SubscriptionClient, vars m
 		log.Printf("error: %v\n", err)
 	}
 
-	go c.Run()
+	go c.Run() //nolint:errcheck
 
 	<-ctx.Done()
 

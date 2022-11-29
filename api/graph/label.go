@@ -2,7 +2,6 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/graph-gophers/graphql-go"
 )
@@ -33,7 +32,6 @@ func (g *Graph) LabelAdd(args LabelAddArgs) (graphql.ID, error) {
 		for _, l := range args.Labels {
 			for _, v := range l.Values {
 				if err := g.store.LabelCreate(string(args.Hash), l.Key, v); err != nil {
-					fmt.Printf("err: %+v\n", err)
 					return "", err
 				}
 			}

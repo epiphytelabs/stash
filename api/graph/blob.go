@@ -2,7 +2,6 @@ package graph
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"strings"
 
@@ -79,10 +78,8 @@ type BlobCreateArgs struct {
 }
 
 func (g *Graph) BlobCreate(args BlobCreateArgs) (*Blob, error) {
-	b, x := transactionReturn(context.Background(), g, func(gg *Graph) (*Blob, error) {
+	return transactionReturn(context.Background(), g, func(gg *Graph) (*Blob, error) {
 		b, err := gg.store.BlobCreate(strings.NewReader(args.Data))
-		fmt.Printf("b: %+v\n", b)
-		fmt.Printf("err: %+v\n", err)
 		if err != nil {
 			return nil, err
 		}
@@ -91,7 +88,6 @@ func (g *Graph) BlobCreate(args BlobCreateArgs) (*Blob, error) {
 			for _, l := range *args.Labels {
 				for _, v := range l.Values {
 					if err := gg.store.LabelCreate(b.Hash, l.Key, v); err != nil {
-						fmt.Printf("err: %+v\n", err)
 						return nil, err
 					}
 				}
@@ -100,9 +96,6 @@ func (g *Graph) BlobCreate(args BlobCreateArgs) (*Blob, error) {
 
 		return &Blob{*b, g}, nil
 	})
-	fmt.Printf("b: %+v\n", b)
-	fmt.Printf("x: %+v\n", x)
-	return b, x
 }
 
 type BlobRemovedArgs struct {
