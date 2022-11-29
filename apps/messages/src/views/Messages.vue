@@ -78,6 +78,12 @@ onMounted(() => {
 	const compose = document.getElementById("compose");
 	modal = new bootstrap.Modal(compose);
 
+	compose.addEventListener("show.bs.modal", function () {
+		document.getElementById("to").value = "";
+		document.getElementById("subject").value = "";
+		document.getElementById("body").value = "";
+	});
+
 	compose.addEventListener("shown.bs.modal", function () {
 		composing = true;
 		document.getElementById("to").focus();
