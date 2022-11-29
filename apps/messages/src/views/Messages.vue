@@ -5,6 +5,7 @@ import ThreadMessages from "@/components/ThreadMessages.vue";
 import ThreadSummary from "@/components/ThreadSummary.vue";
 import Threads from "@/models/Threads";
 import router from "@/router";
+import bootstrap from "bootstrap/dist/js/bootstrap.min.js";
 
 const { result, loading, error } = Threads();
 
@@ -14,8 +15,14 @@ const route = useRoute();
 // 	return `<html><body>${body}</body></html>`;
 // };
 
+var composing = false;
+
 const current = function (id) {
 	return id == route.params.id;
+};
+
+const decompose = function () {
+	modal.hide();
 };
 
 const id = computed(() => {
@@ -25,6 +32,8 @@ const id = computed(() => {
 const klass = function (id) {
 	return current(id) ? "active" : "";
 };
+
+var modal;
 
 // const resize = function (e) {
 // 	const iframe = e.target;
@@ -66,8 +75,25 @@ const visible = function (thread) {
 };
 
 onMounted(() => {
+	const compose = document.getElementById("compose");
+	modal = new bootstrap.Modal(compose);
+
+	compose.addEventListener("shown.bs.modal", function () {
+		composing = true;
+		document.getElementById("to").focus();
+	});
+
+	compose.addEventListener("hidden.bs.modal", function () {
+		composing = false;
+	});
+
 	window.addEventListener("keypress", (e) => {
+		if (composing) return;
+
 		switch (e.key) {
+			case "c":
+				modal.show();
+				break;
 			case "j":
 				scroll(select(threads.value[threads.value.indexOf(thread.value) + 1]), false);
 				break;
@@ -102,6 +128,32 @@ watch(error, () => {
 		</div>
 		<div class="col-7">
 			<ThreadMessages v-for="thread in threads" :key="thread.id" :thread="thread" :current="id" />
+		</div>
+	</div>
+	<div class="modal fade" id="compose" tabindex="-1" aria-labelledby="composeLabel" aria-hidden="true">
+		<div class="modal-dialog modal-xl modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="composeLabel">Send Message</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<form>
+						<div class="mb-3">
+							<input type="text" class="form-control" id="to" placeholder="To" />
+						</div>
+						<div class="mb-3">
+							<input type="text" class="form-control" id="subject" placeholder="Subject" />
+						</div>
+						<div class="mb-3">
+							<textarea class="form-control" id="body" rows="20"></textarea>
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" @click="decompose">Send</button>
+				</div>
+			</div>
 		</div>
 	</div>
 </template>
